@@ -185,6 +185,31 @@
       border-radius: 10px;
     }
 
+    textarea {
+      width: 100%;
+      min-height: 130px;
+      padding: 12px;
+      color: #e5e7eb;
+      background: #0f172a;
+      border: 1px solid #475569;
+      border-radius: 12px;
+      font: inherit;
+      line-height: 1.55;
+      resize: vertical;
+    }
+
+    textarea:focus {
+      outline: 2px solid #0891b2;
+      outline-offset: 1px;
+    }
+
+    .textarea-footer {
+      margin-top: 5px;
+      color: #94a3b8;
+      font-size: 0.78rem;
+      text-align: right;
+    }
+
     button {
       width: 100%;
       padding: 13px 18px;
@@ -334,7 +359,7 @@
       <h1>運動科學實驗室簽到系統</h1>
       <p>
         請使用 Google 帳號完成身分驗證
-        <span class="version-label">v0.2 協助簽退</span>
+        <span class="version-label">v0.3 問題回報</span>
       </p>
     </header>
 
@@ -421,6 +446,26 @@
         <ul id="assist-list" class="people-list"></ul>
         <p id="empty-assist" class="empty-text hidden">目前沒有可協助簽退的人員。</p>
       </section>
+
+      <section class="card">
+        <h2>問題回報</h2>
+        <p class="hint">
+          若設備、環境或系統發生異常，請留下具體描述。系統會自動記錄你的 Google 登入身分與回報時間。
+        </p>
+        <label for="issue-text">問題描述</label>
+        <textarea
+          id="issue-text"
+          minlength="5"
+          maxlength="1000"
+          placeholder="例如：除濕機無法啟動，面板顯示錯誤代碼……"
+        ></textarea>
+        <div class="textarea-footer">
+          <span id="issue-count">0</span>/1000
+        </div>
+        <button id="issue-submit-button" class="primary-button" type="button">
+          送出問題回報
+        </button>
+      </section>
     </div>
   </main>
 
@@ -447,6 +492,9 @@
     const emptyPeople = document.getElementById('empty-people');
     const assistList = document.getElementById('assist-list');
     const emptyAssist = document.getElementById('empty-assist');
+    const issueText = document.getElementById('issue-text');
+    const issueCount = document.getElementById('issue-count');
+    const issueSubmitButton = document.getElementById('issue-submit-button');
 
     let supabaseClient;
     let currentSession = null;
@@ -465,6 +513,8 @@
       checkInButton.disabled = isBusy;
       checkOutButton.disabled = isBusy;
       refreshButton.disabled = isBusy;
+      issueSubmitButton.disabled = isBusy;
+      issueText.disabled = isBusy;
 
       for (const button of document.querySelectorAll('[data-assist-user-id]')) {
         button.disabled = isBusy;
@@ -860,6 +910,38 @@
       }
 
       await loadAppState(`已協助「${target.profile.display_name}」完成簽退`);
+    });
+
+    issueText.addEventListener('input', () => {
+      issueCount.textContent = String(issueText.value.length);
+    });
+
+    issueSubmitButton.addEventListener('click', async () => {
+      const description = issueText.value.trim();
+
+      if (description.length < 5) {
+        setMessage('問題描述至少需要 5 個字元。', 'error');
+        issueText.focus();
+        return;
+      }
+
+      setBusy(true);
+      setMessage('正在儲存問題回報……');
+
+      const { error } = await supabaseClient.rpc('report_issue', {
+        issue_text: description
+      });
+
+      if (error) {
+        setMessage(`問題回報失敗：${error.message}`, 'error');
+        setBusy(false);
+        return;
+      }
+
+      issueText.value = '';
+      issueCount.textContent = '0';
+      setMessage('問題回報已成功儲存。', 'success');
+      setBusy(false);
     });
 
     initializeAuth();
