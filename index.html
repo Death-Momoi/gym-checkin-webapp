@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>運動科學實驗室簽到系統</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      min-height: 100vh;
+      margin: 0;
+      padding: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: system-ui, sans-serif;
+      color: #e5e7eb;
+      background: #030712;
+    }
+
+    main {
+      width: 100%;
+      max-width: 420px;
+      padding: 28px;
+      text-align: center;
+      background: #111827;
+      border: 1px solid #374151;
+      border-radius: 24px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
+    }
+
+    h1 {
+      margin-top: 0;
+      color: #22d3ee;
+    }
+
+    #status {
+      margin: 20px 0;
+      padding: 14px;
+      color: #9ca3af;
+      background: #030712;
+      border: 1px solid #374151;
+      border-radius: 12px;
+      overflow-wrap: anywhere;
+    }
+
+    button {
+      width: 100%;
+      padding: 13px 18px;
+      margin-top: 8px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      border: 0;
+      border-radius: 12px;
+    }
+
+    #login-button {
+      color: #111827;
+      background: #ffffff;
+    }
+
+    #logout-button {
+      color: #ffffff;
+      background: #dc2626;
+    }
+
+    .hidden {
+      display: none;
+    }
+  </style>
+</head>
+
+<body>
+  <main>
+    <h1>運動科學實驗室簽到系統</h1>
+    <p>GitHub Pages＋Supabase Google 登入測試</p>
+
+    <div id="status">正在初始化……</div>
+
+    <button id="login-button" class="hidden" type="button">
+      使用 Google 帳號登入
+    </button>
+
+    <button id="logout-button" class="hidden" type="button">
+      登出
+    </button>
+  </main>
+
+  <script>
+    const SUPABASE_URL = 'https://rihibyswtlqsyljarerr.supabase.co';
+    const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_gS2aS6imvz3_AH9ZgmJXtg_gAXd-wYO';
+    const REDIRECT_URL =
+      'https://death-momoi.github.io/gym-checkin-webapp/';
+
+    const statusElement = document.getElementById('status');
+    const loginButton = document.getElementById('login-button');
+    const logoutButton = document.getElementById('logout-button');
+
+    let supabaseClient = null;
+
+    function showSignedOut() {
+      statusElement.textContent = '尚未登入';
+      loginButton.classList.remove('hidden');
+      logoutButton.classList.add('hidden');
+    }
+
+    function showSignedIn(session) {
+      const user = session.user;
+      const displayName =
+        user.user_metadata?.full_name ||
+        user.user_metadata?.name ||
+        '未提供姓名';
+
+      statusElement.textContent =
+        `登入成功：${displayName}（${user.email || '無 Email'}）`;
+
+      loginButton.classList.add('hidden');
+      logoutButton.classList.remove('hidden');
+    }
+
+    async function initializeAuth() {
+      if (
+        !SUPABASE_URL.startsWith('https://') ||
+        !SUPABASE_PUBLISHABLE_KEY.startsWith('sb_publishable_')
+      ) {
+        statusElement.textContent =
+          '設定尚未完成：請填入 Project URL 與 Publishable Key。';
+        return;
+      }
+
+      supabaseClient = window.supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_PUBLISHABLE_KEY,
+        {
+          auth: {
+            persistSession: true,
+            autoRefreshToken: true,
+            detectSessionInUrl: true
+          }
+        }
+      );
+
+      const { data, error } = await supabaseClient.auth.getSession();
+
+      if (error) {
+        statusElement.textContent = `讀取登入狀態失敗：${error.message}`;
+        return;
+      }
+
+      if (data.session) {
+        showSignedIn(data.session);
+      } else {
+        showSignedOut();
+      }
+
+      supabaseClient.auth.onAuthStateChange((_event, session) => {
+        if (session) {
+          showSignedIn(session);
+        } else {
+          showSignedOut();
+        }
+      });
+    }
+
+    loginButton.addEventListener('click', async () => {
+      statusElement.textContent = '正在前往 Google 登入……';
+      loginButton.disabled = true;
+
+      const { error } = await supabaseClient.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: REDIRECT_URL
+        }
+      });
+
+      if (error) {
+        statusElement.textContent = `登入失敗：${error.message}`;
+        loginButton.disabled = false;
+      }
+    });
+
+    logoutButton.addEventListener('click', async () => {
+      const { error } = await supabaseClient.auth.signOut();
+
+      if (error) {
+        statusElement.textContent = `登出失敗：${error.message}`;
+        return;
+      }
+
+      showSignedOut();
+    });
+
+    initializeAuth();
+  </script>
+</body>
+</html>
