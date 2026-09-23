@@ -18,6 +18,27 @@ function jsonResponse(body, status = 200) {
   });
 }
 
+function describeError(error) {
+  if (error instanceof Error) return error.message;
+
+  if (
+    error &&
+    typeof error === "object" &&
+    "message" in error &&
+    typeof error.message === "string"
+  ) {
+    return error.message;
+  }
+
+  if (typeof error === "string") return error;
+
+  try {
+    return JSON.stringify(error);
+  } catch {
+    return "未知的 Gmail 通知錯誤";
+  }
+}
+
 function requiredEnv(name) {
   const value = Deno.env.get(name)?.trim();
   if (!value) throw new Error(`缺少 Edge Function Secret：${name}`);
@@ -305,11 +326,9 @@ Deno.serve(async (request) => {
       status_recorded: true,
     });
   } catch (error) {
-    const errorMessage = error instanceof Error
-      ? error.message
-      : "未知的 Gmail 通知錯誤";
+    const errorMessage = describeError(error);
 
-    console.error("send-issue-email failed", error);
+    console.error("send-issue-email failed", errorMessage, error);
 
     if (supabaseAdmin && ownedReport) {
       const { error: statusError } = await supabaseAdmin
