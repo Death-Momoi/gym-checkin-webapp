@@ -49,6 +49,17 @@
       color: #94a3b8;
     }
 
+    .version-label {
+      display: inline-block;
+      margin-left: 6px;
+      padding: 2px 7px;
+      color: #a5f3fc;
+      background: #164e63;
+      border-radius: 999px;
+      font-size: 0.72rem;
+      vertical-align: middle;
+    }
+
     .card {
       margin-bottom: 16px;
       padding: 22px;
@@ -250,6 +261,33 @@
       font-weight: 700;
     }
 
+    .row-actions {
+      display: flex;
+      flex: none;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+
+    .assist-button {
+      width: auto;
+      margin: 0;
+      padding: 8px 10px;
+      color: #111827;
+      background: #fbbf24;
+      font-size: 0.82rem;
+    }
+
+    .locked-label,
+    .self-label {
+      padding: 5px 9px;
+      color: #cbd5e1;
+      background: #334155;
+      border-radius: 999px;
+      font-size: 0.76rem;
+      white-space: nowrap;
+    }
+
     .empty-text,
     .hint {
       color: #94a3b8;
@@ -277,6 +315,15 @@
       .role-options {
         grid-template-columns: 1fr;
       }
+
+      .person-row {
+        align-items: flex-start;
+      }
+
+      .row-actions {
+        flex-direction: column;
+        align-items: flex-end;
+      }
     }
   </style>
 </head>
@@ -285,7 +332,10 @@
   <main>
     <header>
       <h1>運動科學實驗室簽到系統</h1>
-      <p>請使用 Google 帳號完成身分驗證</p>
+      <p>
+        請使用 Google 帳號完成身分驗證
+        <span class="version-label">v0.2 協助簽退</span>
+      </p>
     </header>
 
     <div id="message">正在初始化……</div>
@@ -362,6 +412,15 @@
         <p id="empty-people" class="empty-text hidden">目前沒有已簽到的人員。</p>
         <button id="refresh-button" class="secondary-button" type="button">重新整理</button>
       </section>
+
+      <section class="card">
+        <h2>協助他人簽退</h2>
+        <p class="hint">
+          只能協助其他共同使用者；主要借用者必須本人完成設備檢查與簽退。
+        </p>
+        <ul id="assist-list" class="people-list"></ul>
+        <p id="empty-assist" class="empty-text hidden">目前沒有可協助簽退的人員。</p>
+      </section>
     </div>
   </main>
 
@@ -386,6 +445,8 @@
     const transferUser = document.getElementById('transfer-user');
     const peopleList = document.getElementById('people-list');
     const emptyPeople = document.getElementById('empty-people');
+    const assistList = document.getElementById('assist-list');
+    const emptyAssist = document.getElementById('empty-assist');
 
     let supabaseClient;
     let currentSession = null;
@@ -404,6 +465,10 @@
       checkInButton.disabled = isBusy;
       checkOutButton.disabled = isBusy;
       refreshButton.disabled = isBusy;
+
+      for (const button of document.querySelectorAll('[data-assist-user-id]')) {
+        button.disabled = isBusy;
+      }
     }
 
     function formatTime(value) {
@@ -531,6 +596,7 @@
 
       renderTransferOptions();
       renderPeopleList();
+      renderAssistList();
       updateEquipmentState();
     }
 
@@ -578,6 +644,53 @@
         details.append(name, time);
         row.append(details, badge);
         peopleList.appendChild(row);
+      }
+    }
+
+    function renderAssistList() {
+      assistList.replaceChildren();
+
+      const otherPeople = openPeople.filter(
+        person => person.user_id !== currentSession.user.id
+      );
+
+      emptyAssist.classList.toggle('hidden', otherPeople.length > 0);
+
+      for (const person of otherPeople) {
+        const row = document.createElement('li');
+        row.className = 'person-row';
+
+        const details = document.createElement('div');
+        const name = document.createElement('strong');
+        const time = document.createElement('span');
+        const actions = document.createElement('div');
+        const badge = document.createElement('div');
+
+        name.textContent = person.profile.display_name;
+        time.textContent = `${formatTime(person.checked_in_at)} 簽到`;
+        actions.className = 'row-actions';
+        badge.className = 'role-badge';
+        badge.textContent = roleLabel(person.gym_role);
+
+        details.append(name, time);
+        actions.appendChild(badge);
+
+        if (person.gym_role === 'primary') {
+          const lockedLabel = document.createElement('div');
+          lockedLabel.className = 'locked-label';
+          lockedLabel.textContent = '需本人簽退';
+          actions.appendChild(lockedLabel);
+        } else {
+          const assistButton = document.createElement('button');
+          assistButton.className = 'assist-button';
+          assistButton.type = 'button';
+          assistButton.dataset.assistUserId = person.user_id;
+          assistButton.textContent = '協助簽退';
+          actions.appendChild(assistButton);
+        }
+
+        row.append(details, actions);
+        assistList.appendChild(row);
       }
     }
 
@@ -716,6 +829,38 @@
 
     transferUser.addEventListener('change', updateEquipmentState);
     refreshButton.addEventListener('click', () => loadAppState());
+
+    assistList.addEventListener('click', async event => {
+      const button = event.target.closest('[data-assist-user-id]');
+      if (!button) return;
+
+      const targetUserId = button.dataset.assistUserId;
+      const target = openPeople.find(person => person.user_id === targetUserId);
+      if (!target) {
+        setMessage('找不到該使用者的最新簽到狀態，請重新整理。', 'error');
+        return;
+      }
+
+      const confirmed = window.confirm(
+        `確定要協助「${target.profile.display_name}」簽退嗎？`
+      );
+      if (!confirmed) return;
+
+      setBusy(true);
+      setMessage(`正在協助「${target.profile.display_name}」簽退……`);
+
+      const { error } = await supabaseClient.rpc('gym_assist_check_out', {
+        target_user_id: targetUserId
+      });
+
+      if (error) {
+        setMessage(`協助簽退失敗：${error.message}`, 'error');
+        setBusy(false);
+        return;
+      }
+
+      await loadAppState(`已協助「${target.profile.display_name}」完成簽退`);
+    });
 
     initializeAuth();
   </script>
