@@ -359,7 +359,7 @@
       <h1>運動科學實驗室簽到系統</h1>
       <p>
         請使用 Google 帳號完成身分驗證
-        <span class="version-label">v0.3 問題回報</span>
+        <span class="version-label">v0.4 Gmail 通知</span>
       </p>
     </header>
 
@@ -928,19 +928,53 @@
       setBusy(true);
       setMessage('正在儲存問題回報……');
 
-      const { error } = await supabaseClient.rpc('report_issue', {
+      const { data: reportResult, error: reportError } =
+        await supabaseClient.rpc('report_issue', {
         issue_text: description
       });
 
-      if (error) {
-        setMessage(`問題回報失敗：${error.message}`, 'error');
+      if (reportError) {
+        setMessage(`問題回報失敗：${reportError.message}`, 'error');
         setBusy(false);
         return;
       }
 
       issueText.value = '';
       issueCount.textContent = '0';
-      setMessage('問題回報已成功儲存。', 'success');
+
+      const createdReport = Array.isArray(reportResult)
+        ? reportResult[0]
+        : reportResult;
+
+      if (!createdReport?.id) {
+        setMessage(
+          '問題回報已儲存，但無法取得回報編號，因此尚未寄出 Gmail 通知。',
+          'error'
+        );
+        setBusy(false);
+        return;
+      }
+
+      setMessage('問題回報已儲存，正在寄送 Gmail 通知……');
+
+      const { data: emailResult, error: emailError } =
+        await supabaseClient.functions.invoke('send-issue-email', {
+          body: {
+            report_id: createdReport.id
+          }
+        });
+
+      if (emailError || !emailResult?.ok) {
+        console.error('Gmail notification failed', emailError, emailResult);
+        setMessage(
+          '問題回報已成功儲存，但 Gmail 通知寄送失敗。',
+          'error'
+        );
+        setBusy(false);
+        return;
+      }
+
+      setMessage('問題回報已儲存，Gmail 通知也已寄出。', 'success');
       setBusy(false);
     });
 
