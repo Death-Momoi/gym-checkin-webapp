@@ -8,6 +8,13 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
+    :root {
+      color-scheme: dark;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #030712;
+      color: #e5e7eb;
+    }
+
     * {
       box-sizing: border-box;
     }
@@ -15,126 +22,575 @@
     body {
       min-height: 100vh;
       margin: 0;
-      padding: 24px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-family: system-ui, sans-serif;
-      color: #e5e7eb;
-      background: #030712;
+      padding: 24px 16px;
+      background:
+        radial-gradient(circle at top, rgba(6, 182, 212, 0.15), transparent 34rem),
+        #030712;
     }
 
     main {
-      width: 100%;
-      max-width: 420px;
-      padding: 28px;
+      width: min(100%, 760px);
+      margin: 0 auto;
+    }
+
+    header {
+      margin-bottom: 20px;
       text-align: center;
-      background: #111827;
-      border: 1px solid #374151;
-      border-radius: 24px;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
     }
 
     h1 {
-      margin-top: 0;
-      color: #22d3ee;
+      margin: 0;
+      color: #67e8f9;
+      font-size: clamp(1.7rem, 5vw, 2.35rem);
     }
 
-    #status {
-      margin: 20px 0;
-      padding: 14px;
-      color: #9ca3af;
-      background: #030712;
+    header p {
+      margin: 8px 0 0;
+      color: #94a3b8;
+    }
+
+    .card {
+      margin-bottom: 16px;
+      padding: 22px;
+      background: rgba(17, 24, 39, 0.94);
+      border: 1px solid #374151;
+      border-radius: 20px;
+      box-shadow: 0 18px 50px rgba(0, 0, 0, 0.26);
+    }
+
+    .card h2 {
+      margin: 0 0 16px;
+      color: #f8fafc;
+      font-size: 1.15rem;
+    }
+
+    #message {
+      margin-bottom: 16px;
+      padding: 12px 14px;
+      color: #cbd5e1;
+      background: #111827;
       border: 1px solid #374151;
       border-radius: 12px;
       overflow-wrap: anywhere;
     }
 
+    #message.success {
+      color: #a7f3d0;
+      background: rgba(6, 78, 59, 0.35);
+      border-color: #047857;
+    }
+
+    #message.error {
+      color: #fecaca;
+      background: rgba(127, 29, 29, 0.35);
+      border-color: #b91c1c;
+    }
+
+    .identity {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 16px;
+    }
+
+    .avatar {
+      width: 52px;
+      height: 52px;
+      object-fit: cover;
+      background: #1f2937;
+      border: 2px solid #155e75;
+      border-radius: 50%;
+    }
+
+    .identity strong,
+    .identity span {
+      display: block;
+    }
+
+    .identity span {
+      margin-top: 3px;
+      color: #94a3b8;
+      font-size: 0.9rem;
+      overflow-wrap: anywhere;
+    }
+
+    .state-box {
+      margin: 14px 0;
+      padding: 14px;
+      background: #030712;
+      border: 1px solid #374151;
+      border-radius: 12px;
+    }
+
+    .state-box strong {
+      color: #67e8f9;
+    }
+
+    .role-options {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin: 14px 0;
+    }
+
+    .role-option,
+    .check-option {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      padding: 12px;
+      background: #0f172a;
+      border: 1px solid #475569;
+      border-radius: 12px;
+      cursor: pointer;
+    }
+
+    .checks {
+      display: grid;
+      gap: 8px;
+      margin: 12px 0;
+    }
+
+    input[type="radio"],
+    input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      accent-color: #06b6d4;
+    }
+
+    label,
+    select,
+    button {
+      font: inherit;
+    }
+
+    select {
+      width: 100%;
+      margin: 7px 0 5px;
+      padding: 12px;
+      color: #e5e7eb;
+      background: #0f172a;
+      border: 1px solid #475569;
+      border-radius: 10px;
+    }
+
     button {
       width: 100%;
       padding: 13px 18px;
-      margin-top: 8px;
-      font-size: 16px;
-      font-weight: 700;
+      margin-top: 9px;
+      font-weight: 750;
       cursor: pointer;
       border: 0;
       border-radius: 12px;
+      transition: transform 0.15s ease, opacity 0.15s ease;
+    }
+
+    button:hover:not(:disabled) {
+      transform: translateY(-1px);
+    }
+
+    button:disabled {
+      cursor: wait;
+      opacity: 0.55;
+    }
+
+    .primary-button {
+      color: #06202a;
+      background: #22d3ee;
+    }
+
+    .danger-button {
+      color: #fff;
+      background: #dc2626;
+    }
+
+    .secondary-button {
+      color: #e5e7eb;
+      background: #334155;
     }
 
     #login-button {
       color: #111827;
-      background: #ffffff;
+      background: #fff;
     }
 
-    #logout-button {
-      color: #ffffff;
-      background: #dc2626;
+    .people-list {
+      display: grid;
+      gap: 10px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .person-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 14px;
+      background: #0f172a;
+      border: 1px solid #334155;
+      border-radius: 12px;
+    }
+
+    .person-row span {
+      display: block;
+      margin-top: 3px;
+      color: #94a3b8;
+      font-size: 0.82rem;
+    }
+
+    .role-badge {
+      flex: none;
+      padding: 5px 9px;
+      color: #cffafe;
+      background: #164e63;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: 700;
+    }
+
+    .empty-text,
+    .hint {
+      color: #94a3b8;
+      font-size: 0.9rem;
+    }
+
+    .hint {
+      margin: 8px 0;
+      line-height: 1.55;
     }
 
     .hidden {
-      display: none;
+      display: none !important;
+    }
+
+    @media (max-width: 520px) {
+      body {
+        padding: 16px 10px;
+      }
+
+      .card {
+        padding: 18px;
+      }
+
+      .role-options {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
 </head>
 
 <body>
   <main>
-    <h1>運動科學實驗室簽到系統</h1>
-    <p>GitHub Pages＋Supabase Google 登入測試</p>
+    <header>
+      <h1>運動科學實驗室簽到系統</h1>
+      <p>請使用 Google 帳號完成身分驗證</p>
+    </header>
 
-    <div id="status">正在初始化……</div>
+    <div id="message">正在初始化……</div>
 
-    <button id="login-button" class="hidden" type="button">
-      使用 Google 帳號登入
-    </button>
+    <section id="signed-out-card" class="card hidden">
+      <h2>登入</h2>
+      <p class="hint">每位使用者都必須使用自己的 Google 帳號登入。</p>
+      <button id="login-button" type="button">使用 Google 帳號登入</button>
+    </section>
 
-    <button id="logout-button" class="hidden" type="button">
-      登出
-    </button>
+    <div id="signed-in-area" class="hidden">
+      <section class="card">
+        <div class="identity">
+          <img id="avatar" class="avatar" alt="使用者頭像">
+          <div>
+            <strong id="display-name">—</strong>
+            <span id="email">—</span>
+          </div>
+        </div>
+
+        <div id="attendance-state" class="state-box">讀取狀態中……</div>
+
+        <div id="check-in-controls" class="hidden">
+          <p class="hint">請選擇本次使用身分：</p>
+          <div class="role-options">
+            <label class="role-option">
+              <input type="radio" name="gym-role" value="member" checked>
+              共同使用者
+            </label>
+            <label class="role-option">
+              <input type="radio" name="gym-role" value="primary">
+              主要借用者
+            </label>
+          </div>
+          <button id="check-in-button" class="primary-button" type="button">簽到</button>
+        </div>
+
+        <div id="check-out-controls" class="hidden">
+          <div id="primary-checkout-controls" class="hidden">
+            <p class="hint">
+              如果現場有人可以接替，可選擇交接；否則請完成三項設備檢查。
+            </p>
+
+            <label for="transfer-user">責任交接（選填）</label>
+            <select id="transfer-user">
+              <option value="">不交接，由我完成設備檢查</option>
+            </select>
+
+            <div id="equipment-checks" class="checks">
+              <label class="check-option">
+                <input id="trash-check" type="checkbox">
+                垃圾已清理
+              </label>
+              <label class="check-option">
+                <input id="ac-lights-check" type="checkbox">
+                冷氣與電燈已關閉
+              </label>
+              <label class="check-option">
+                <input id="dehumidifier-check" type="checkbox">
+                除濕機已開啟
+              </label>
+            </div>
+          </div>
+
+          <button id="check-out-button" class="danger-button" type="button">簽退</button>
+        </div>
+
+        <button id="logout-button" class="secondary-button" type="button">登出</button>
+      </section>
+
+      <section class="card">
+        <h2>目前在場人員</h2>
+        <ul id="people-list" class="people-list"></ul>
+        <p id="empty-people" class="empty-text hidden">目前沒有已簽到的人員。</p>
+        <button id="refresh-button" class="secondary-button" type="button">重新整理</button>
+      </section>
+    </div>
   </main>
 
   <script>
     const SUPABASE_URL = 'https://rihibyswtlqsyljarerr.supabase.co';
     const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_gS2aS6imvz3_AH9ZgmJXtg_gAXd-wYO';
-    const REDIRECT_URL =
-      'https://death-momoi.github.io/gym-checkin-webapp/';
+    const REDIRECT_URL = 'https://death-momoi.github.io/gym-checkin-webapp/';
 
-    const statusElement = document.getElementById('status');
+    const messageElement = document.getElementById('message');
+    const signedOutCard = document.getElementById('signed-out-card');
+    const signedInArea = document.getElementById('signed-in-area');
     const loginButton = document.getElementById('login-button');
     const logoutButton = document.getElementById('logout-button');
+    const checkInButton = document.getElementById('check-in-button');
+    const checkOutButton = document.getElementById('check-out-button');
+    const refreshButton = document.getElementById('refresh-button');
+    const checkInControls = document.getElementById('check-in-controls');
+    const checkOutControls = document.getElementById('check-out-controls');
+    const primaryCheckoutControls = document.getElementById('primary-checkout-controls');
+    const equipmentChecks = document.getElementById('equipment-checks');
+    const attendanceState = document.getElementById('attendance-state');
+    const transferUser = document.getElementById('transfer-user');
+    const peopleList = document.getElementById('people-list');
+    const emptyPeople = document.getElementById('empty-people');
 
-    let supabaseClient = null;
+    let supabaseClient;
+    let currentSession = null;
+    let currentProfile = null;
+    let currentAttendance = null;
+    let openPeople = [];
 
-    function showSignedOut() {
-      statusElement.textContent = '尚未登入';
-      loginButton.classList.remove('hidden');
-      logoutButton.classList.add('hidden');
+    function setMessage(text, type = '') {
+      messageElement.textContent = text;
+      messageElement.className = type;
     }
 
-    function showSignedIn(session) {
-      const user = session.user;
-      const displayName =
-        user.user_metadata?.full_name ||
-        user.user_metadata?.name ||
-        '未提供姓名';
+    function setBusy(isBusy) {
+      loginButton.disabled = isBusy;
+      logoutButton.disabled = isBusy;
+      checkInButton.disabled = isBusy;
+      checkOutButton.disabled = isBusy;
+      refreshButton.disabled = isBusy;
+    }
 
-      statusElement.textContent =
-        `登入成功：${displayName}（${user.email || '無 Email'}）`;
+    function formatTime(value) {
+      return new Intl.DateTimeFormat('zh-TW', {
+        timeZone: 'Asia/Taipei',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false
+      }).format(new Date(value));
+    }
 
-      loginButton.classList.add('hidden');
-      logoutButton.classList.remove('hidden');
+    function roleLabel(role) {
+      return role === 'primary' ? '主要借用者' : '共同使用者';
+    }
+
+    function showSignedOut() {
+      currentSession = null;
+      currentProfile = null;
+      currentAttendance = null;
+      openPeople = [];
+      setBusy(false);
+      signedOutCard.classList.remove('hidden');
+      signedInArea.classList.add('hidden');
+      setMessage('尚未登入');
+    }
+
+    function showSignedInShell(session) {
+      currentSession = session;
+      signedOutCard.classList.add('hidden');
+      signedInArea.classList.remove('hidden');
+
+      const metadata = session.user.user_metadata || {};
+      document.getElementById('display-name').textContent =
+        metadata.full_name || metadata.name || '讀取中……';
+      document.getElementById('email').textContent = session.user.email || '無 Email';
+
+      const avatar = document.getElementById('avatar');
+      avatar.src = metadata.avatar_url || metadata.picture ||
+        'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(
+          '<svg xmlns="http://www.w3.org/2000/svg" width="80" height="80"><rect width="100%" height="100%" fill="#1f2937"/><text x="50%" y="55%" text-anchor="middle" fill="#67e8f9" font-size="32">👤</text></svg>'
+        );
+    }
+
+    async function loadAppState(successMessage = '') {
+      if (!currentSession) return;
+
+      setBusy(true);
+      setMessage('正在同步簽到狀態……');
+
+      try {
+        const userId = currentSession.user.id;
+
+        const [profileResponse, attendanceResponse] = await Promise.all([
+          supabaseClient
+            .from('profiles')
+            .select('id, display_name, avatar_url, status, app_role')
+            .eq('id', userId)
+            .single(),
+          supabaseClient
+            .from('attendance_sessions')
+            .select('id, user_id, gym_role, checked_in_at')
+            .is('checked_out_at', null)
+            .order('checked_in_at', { ascending: true })
+        ]);
+
+        if (profileResponse.error) throw profileResponse.error;
+        if (attendanceResponse.error) throw attendanceResponse.error;
+
+        currentProfile = profileResponse.data;
+        const sessions = attendanceResponse.data || [];
+        const userIds = [...new Set(sessions.map(item => item.user_id))];
+
+        let profileMap = new Map();
+        if (userIds.length > 0) {
+          const { data: profiles, error: profilesError } = await supabaseClient
+            .from('profiles')
+            .select('id, display_name, avatar_url')
+            .in('id', userIds);
+
+          if (profilesError) throw profilesError;
+          profileMap = new Map((profiles || []).map(profile => [profile.id, profile]));
+        }
+
+        openPeople = sessions.map(session => ({
+          ...session,
+          profile: profileMap.get(session.user_id) || {
+            display_name: '未知使用者',
+            avatar_url: null
+          }
+        }));
+
+        currentAttendance =
+          openPeople.find(item => item.user_id === userId) || null;
+
+        renderAppState();
+        setMessage(successMessage || '資料已同步', 'success');
+      } catch (error) {
+        console.error(error);
+        setMessage(`讀取資料失敗：${error.message}`, 'error');
+      } finally {
+        setBusy(false);
+      }
+    }
+
+    function renderAppState() {
+      document.getElementById('display-name').textContent = currentProfile.display_name;
+
+      if (currentProfile.avatar_url) {
+        document.getElementById('avatar').src = currentProfile.avatar_url;
+      }
+
+      checkInControls.classList.toggle('hidden', Boolean(currentAttendance));
+      checkOutControls.classList.toggle('hidden', !currentAttendance);
+
+      if (currentAttendance) {
+        attendanceState.textContent =
+          `目前已簽到｜${roleLabel(currentAttendance.gym_role)}｜` +
+          `${formatTime(currentAttendance.checked_in_at)}`;
+      } else {
+        attendanceState.textContent = '目前尚未簽到';
+      }
+
+      const isPrimary = currentAttendance?.gym_role === 'primary';
+      primaryCheckoutControls.classList.toggle('hidden', !isPrimary);
+
+      renderTransferOptions();
+      renderPeopleList();
+      updateEquipmentState();
+    }
+
+    function renderTransferOptions() {
+      const previousValue = transferUser.value;
+      transferUser.replaceChildren();
+
+      const noTransferOption = document.createElement('option');
+      noTransferOption.value = '';
+      noTransferOption.textContent = '不交接，由我完成設備檢查';
+      transferUser.appendChild(noTransferOption);
+
+      for (const person of openPeople) {
+        if (person.user_id === currentSession.user.id) continue;
+
+        const option = document.createElement('option');
+        option.value = person.user_id;
+        option.textContent = `${person.profile.display_name}（${roleLabel(person.gym_role)}）`;
+        transferUser.appendChild(option);
+      }
+
+      if ([...transferUser.options].some(option => option.value === previousValue)) {
+        transferUser.value = previousValue;
+      }
+    }
+
+    function renderPeopleList() {
+      peopleList.replaceChildren();
+      emptyPeople.classList.toggle('hidden', openPeople.length > 0);
+
+      for (const person of openPeople) {
+        const row = document.createElement('li');
+        row.className = 'person-row';
+
+        const details = document.createElement('div');
+        const name = document.createElement('strong');
+        const time = document.createElement('span');
+        const badge = document.createElement('div');
+
+        name.textContent = person.profile.display_name;
+        time.textContent = `${formatTime(person.checked_in_at)} 簽到`;
+        badge.className = 'role-badge';
+        badge.textContent = roleLabel(person.gym_role);
+
+        details.append(name, time);
+        row.append(details, badge);
+        peopleList.appendChild(row);
+      }
+    }
+
+    function updateEquipmentState() {
+      const isTransferring = Boolean(transferUser.value);
+      equipmentChecks.style.opacity = isTransferring ? '0.45' : '1';
+
+      for (const checkbox of equipmentChecks.querySelectorAll('input')) {
+        checkbox.disabled = isTransferring;
+      }
     }
 
     async function initializeAuth() {
-      if (
-        !SUPABASE_URL.startsWith('https://') ||
-        !SUPABASE_PUBLISHABLE_KEY.startsWith('sb_publishable_')
-      ) {
-        statusElement.textContent =
-          '設定尚未完成：請填入 Project URL 與 Publishable Key。';
-        return;
-      }
-
       supabaseClient = window.supabase.createClient(
         SUPABASE_URL,
         SUPABASE_PUBLISHABLE_KEY,
@@ -150,19 +606,21 @@
       const { data, error } = await supabaseClient.auth.getSession();
 
       if (error) {
-        statusElement.textContent = `讀取登入狀態失敗：${error.message}`;
+        setMessage(`讀取登入狀態失敗：${error.message}`, 'error');
         return;
       }
 
       if (data.session) {
-        showSignedIn(data.session);
+        showSignedInShell(data.session);
+        await loadAppState();
       } else {
         showSignedOut();
       }
 
       supabaseClient.auth.onAuthStateChange((_event, session) => {
         if (session) {
-          showSignedIn(session);
+          showSignedInShell(session);
+          window.setTimeout(() => loadAppState(), 0);
         } else {
           showSignedOut();
         }
@@ -170,8 +628,8 @@
     }
 
     loginButton.addEventListener('click', async () => {
-      statusElement.textContent = '正在前往 Google 登入……';
-      loginButton.disabled = true;
+      setBusy(true);
+      setMessage('正在前往 Google 登入……');
 
       const { error } = await supabaseClient.auth.signInWithOAuth({
         provider: 'google',
@@ -181,21 +639,83 @@
       });
 
       if (error) {
-        statusElement.textContent = `登入失敗：${error.message}`;
-        loginButton.disabled = false;
+        setMessage(`登入失敗：${error.message}`, 'error');
+        setBusy(false);
       }
     });
 
     logoutButton.addEventListener('click', async () => {
+      setBusy(true);
       const { error } = await supabaseClient.auth.signOut();
 
       if (error) {
-        statusElement.textContent = `登出失敗：${error.message}`;
+        setMessage(`登出失敗：${error.message}`, 'error');
+        setBusy(false);
+      }
+    });
+
+    checkInButton.addEventListener('click', async () => {
+      const selectedRole = document.querySelector('input[name="gym-role"]:checked').value;
+      setBusy(true);
+      setMessage('正在簽到……');
+
+      const { error } = await supabaseClient.rpc('gym_check_in', {
+        requested_role: selectedRole
+      });
+
+      if (error) {
+        setMessage(`簽到失敗：${error.message}`, 'error');
+        setBusy(false);
         return;
       }
 
-      showSignedOut();
+      await loadAppState('簽到成功');
     });
+
+    checkOutButton.addEventListener('click', async () => {
+      const isPrimary = currentAttendance?.gym_role === 'primary';
+      const transferTo = isPrimary && transferUser.value
+        ? transferUser.value
+        : null;
+
+      const trashChecked = document.getElementById('trash-check').checked;
+      const acLightsChecked = document.getElementById('ac-lights-check').checked;
+      const dehumidifierChecked = document.getElementById('dehumidifier-check').checked;
+
+      if (
+        isPrimary &&
+        !transferTo &&
+        !(trashChecked && acLightsChecked && dehumidifierChecked)
+      ) {
+        setMessage('主要借用者必須完成三項設備檢查，或選擇責任交接。', 'error');
+        return;
+      }
+
+      setBusy(true);
+      setMessage('正在簽退……');
+
+      const { error } = await supabaseClient.rpc('gym_check_out', {
+        transfer_to_user_id: transferTo,
+        trash_is_checked: trashChecked,
+        ac_lights_are_checked: acLightsChecked,
+        dehumidifier_is_checked: dehumidifierChecked
+      });
+
+      if (error) {
+        setMessage(`簽退失敗：${error.message}`, 'error');
+        setBusy(false);
+        return;
+      }
+
+      document.getElementById('trash-check').checked = false;
+      document.getElementById('ac-lights-check').checked = false;
+      document.getElementById('dehumidifier-check').checked = false;
+      transferUser.value = '';
+      await loadAppState('簽退成功');
+    });
+
+    transferUser.addEventListener('change', updateEquipmentState);
+    refreshButton.addEventListener('click', () => loadAppState());
 
     initializeAuth();
   </script>
