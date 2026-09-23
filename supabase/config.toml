@@ -1,0 +1,4 @@
+project_id = "gym-checkin-webapp"
+
+[functions.send-issue-email]
+verify_jwt = true
