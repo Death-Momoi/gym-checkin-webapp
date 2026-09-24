@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>協助簽退｜運動科學實驗室簽到系統</title>
+  <link rel="stylesheet" href="./assets/styles.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script defer src="./assets/common.js"></script>
+  <script defer src="./assets/assist.js"></script>
+</head>
+<body data-page="assist" data-title="協助簽退">
+  <main class="page-container">
+    <div class="page-heading">
+      <h1>協助他人簽退</h1>
+      <p>只能協助共同使用者；主要借用者必須本人完成設備檢查與簽退。</p>
+    </div>
+
+    <div id="message" class="message">正在讀取可協助簽退的人員……</div>
+
+    <section class="card">
+      <ul id="assist-list" class="people-list"></ul>
+      <p id="empty-assist" class="empty-text hidden">目前沒有可協助簽退的人員。</p>
+      <div class="button-stack">
+        <button id="refresh-button" class="secondary-button" type="button">重新整理</button>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

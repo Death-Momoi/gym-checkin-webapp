@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>目前在場｜運動科學實驗室簽到系統</title>
+  <link rel="stylesheet" href="./assets/styles.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script defer src="./assets/common.js"></script>
+  <script defer src="./assets/present.js"></script>
+</head>
+<body data-page="present" data-title="目前在場">
+  <main class="page-container">
+    <div class="page-heading">
+      <h1>目前在場人員</h1>
+      <p>顯示所有尚未簽退的人員、使用身分與簽到時間。</p>
+    </div>
+
+    <div id="message" class="message">正在讀取在場人員……</div>
+
+    <section class="card">
+      <ul id="people-list" class="people-list"></ul>
+      <p id="empty-people" class="empty-text hidden">目前沒有已簽到的人員。</p>
+      <div class="button-stack">
+        <button id="refresh-button" class="secondary-button" type="button">重新整理</button>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

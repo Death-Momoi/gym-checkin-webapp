@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>預約月曆｜運動科學實驗室簽到系統</title>
+  <link rel="stylesheet" href="./assets/styles.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script defer src="./assets/common.js"></script>
+  <script defer src="./assets/calendar.js"></script>
+</head>
+<body data-page="calendar" data-title="預約月曆">
+  <main class="page-container">
+    <div class="page-heading">
+      <h1>健身房預約月曆</h1>
+      <p>依日期查看 Google Calendar 中的預約名稱與使用時間。</p>
+    </div>
+
+    <div id="message" class="message hidden"></div>
+
+    <section class="card">
+      <div class="date-controls">
+        <label for="calendar-date">
+          查詢日期
+          <input id="calendar-date" type="date">
+        </label>
+        <button id="calendar-refresh-button" class="secondary-button" type="button">
+          查看預約
+        </button>
+      </div>
+
+      <p id="calendar-status" class="section-status" aria-live="polite">
+        正在讀取預約……
+      </p>
+      <ul id="calendar-list" class="calendar-list"></ul>
+    </section>
+  </main>
+</body>
+</html>

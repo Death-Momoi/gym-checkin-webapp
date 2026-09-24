@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>簽到／簽退｜運動科學實驗室簽到系統</title>
+  <link rel="stylesheet" href="./assets/styles.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script defer src="./assets/common.js"></script>
+  <script defer src="./assets/checkin.js"></script>
+</head>
+<body data-page="checkin" data-title="簽到／簽退">
+  <main class="page-container">
+    <div class="page-heading">
+      <h1>簽到／簽退</h1>
+      <p>進入健身房時選擇使用身分；離開時完成簽退與必要的設備確認。</p>
+    </div>
+
+    <div id="message" class="message">正在讀取簽到狀態……</div>
+
+    <section class="card">
+      <div id="attendance-state" class="state-box">讀取狀態中……</div>
+
+      <div id="check-in-controls" class="hidden">
+        <p class="hint">請選擇本次使用身分：</p>
+        <div class="role-options">
+          <label class="role-option">
+            <input type="radio" name="gym-role" value="member" checked>
+            共同使用者
+          </label>
+          <label class="role-option">
+            <input type="radio" name="gym-role" value="primary">
+            主要借用者
+          </label>
+        </div>
+        <button id="check-in-button" class="primary-button" type="button">簽到</button>
+      </div>
+
+      <div id="check-out-controls" class="hidden">
+        <div id="primary-checkout-controls" class="hidden">
+          <p class="hint">
+            如果現場有人可以接替，可選擇責任交接；否則請完成三項設備檢查。
+          </p>
+          <label for="transfer-user">責任交接（選填）</label>
+          <select id="transfer-user">
+            <option value="">不交接，由我完成設備檢查</option>
+          </select>
+
+          <div id="equipment-checks" class="checks">
+            <label class="check-option">
+              <input id="trash-check" type="checkbox">
+              垃圾已清理
+            </label>
+            <label class="check-option">
+              <input id="ac-lights-check" type="checkbox">
+              冷氣與電燈已關閉
+            </label>
+            <label class="check-option">
+              <input id="dehumidifier-check" type="checkbox">
+              除濕機已開啟
+            </label>
+          </div>
+        </div>
+
+        <button id="check-out-button" class="danger-button" type="button">簽退</button>
+      </div>
+
+      <div class="button-stack">
+        <button id="refresh-button" class="secondary-button" type="button">重新整理狀態</button>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

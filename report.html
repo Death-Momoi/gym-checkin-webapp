@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>問題回報｜運動科學實驗室簽到系統</title>
+  <link rel="stylesheet" href="./assets/styles.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script defer src="./assets/common.js"></script>
+  <script defer src="./assets/report.js"></script>
+</head>
+<body data-page="report" data-title="問題回報">
+  <main class="page-container">
+    <div class="page-heading">
+      <h1>問題回報</h1>
+      <p>回報設備、環境或系統異常，系統會保存紀錄並寄送 Gmail 通知。</p>
+    </div>
+
+    <div id="message" class="message hidden"></div>
+
+    <section class="card">
+      <label for="issue-text">問題描述</label>
+      <textarea
+        id="issue-text"
+        minlength="5"
+        maxlength="1000"
+        placeholder="例如：除濕機無法啟動，面板顯示錯誤代碼……"
+      ></textarea>
+      <div class="textarea-footer">
+        <span id="issue-count">0</span>/1000
+      </div>
+      <div class="button-stack">
+        <button id="issue-submit-button" class="primary-button" type="button">
+          送出問題回報
+        </button>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
