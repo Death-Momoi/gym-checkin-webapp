@@ -185,6 +185,23 @@
       border-radius: 10px;
     }
 
+    input[type="date"] {
+      width: 100%;
+      margin-top: 7px;
+      padding: 12px;
+      color: #e5e7eb;
+      color-scheme: dark;
+      background: #0f172a;
+      border: 1px solid #475569;
+      border-radius: 10px;
+      font: inherit;
+    }
+
+    input[type="date"]:focus {
+      outline: 2px solid #0891b2;
+      outline-offset: 1px;
+    }
+
     textarea {
       width: 100%;
       min-height: 130px;
@@ -256,6 +273,77 @@
       margin: 0;
       padding: 0;
       list-style: none;
+    }
+
+    .calendar-controls {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: end;
+      gap: 10px;
+      margin: 14px 0;
+    }
+
+    .calendar-controls button {
+      width: auto;
+      min-width: 120px;
+      margin: 0;
+    }
+
+    .calendar-status {
+      margin: 10px 0;
+      color: #94a3b8;
+      font-size: 0.9rem;
+    }
+
+    .calendar-status.success {
+      color: #a7f3d0;
+    }
+
+    .calendar-status.error {
+      color: #fecaca;
+    }
+
+    .calendar-list {
+      display: grid;
+      gap: 10px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .calendar-event {
+      display: grid;
+      grid-template-columns: minmax(92px, auto) minmax(0, 1fr);
+      align-items: center;
+      gap: 14px;
+      padding: 13px 14px;
+      background: #0f172a;
+      border: 1px solid #334155;
+      border-left: 4px solid #06b6d4;
+      border-radius: 12px;
+    }
+
+    .calendar-event-time {
+      color: #67e8f9;
+      font-size: 0.9rem;
+      font-weight: 750;
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+
+    .calendar-event-title {
+      min-width: 0;
+      overflow-wrap: anywhere;
+    }
+
+    .calendar-event-title span {
+      display: inline-block;
+      margin-top: 4px;
+      padding: 3px 7px;
+      color: #cbd5e1;
+      background: #334155;
+      border-radius: 999px;
+      font-size: 0.72rem;
     }
 
     .person-row {
@@ -341,6 +429,19 @@
         grid-template-columns: 1fr;
       }
 
+      .calendar-controls {
+        grid-template-columns: 1fr;
+      }
+
+      .calendar-controls button {
+        width: 100%;
+      }
+
+      .calendar-event {
+        grid-template-columns: 1fr;
+        gap: 5px;
+      }
+
       .person-row {
         align-items: flex-start;
       }
@@ -359,7 +460,7 @@
       <h1>運動科學實驗室簽到系統</h1>
       <p>
         請使用 Google 帳號完成身分驗證
-        <span class="version-label">v0.4 Gmail 通知</span>
+        <span class="version-label">v0.5 Google Calendar</span>
       </p>
     </header>
 
@@ -439,6 +540,26 @@
       </section>
 
       <section class="card">
+        <h2>健身房預約月曆</h2>
+        <p class="hint">選擇日期後，可查看該日的 Google Calendar 預約名稱與時間。</p>
+
+        <div class="calendar-controls">
+          <label for="calendar-date">
+            查詢日期
+            <input id="calendar-date" type="date">
+          </label>
+          <button id="calendar-refresh-button" class="secondary-button" type="button">
+            查看預約
+          </button>
+        </div>
+
+        <p id="calendar-status" class="calendar-status" aria-live="polite">
+          尚未讀取預約。
+        </p>
+        <ul id="calendar-list" class="calendar-list"></ul>
+      </section>
+
+      <section class="card">
         <h2>協助他人簽退</h2>
         <p class="hint">
           只能協助其他共同使用者；主要借用者必須本人完成設備檢查與簽退。
@@ -495,12 +616,17 @@
     const issueText = document.getElementById('issue-text');
     const issueCount = document.getElementById('issue-count');
     const issueSubmitButton = document.getElementById('issue-submit-button');
+    const calendarDate = document.getElementById('calendar-date');
+    const calendarRefreshButton = document.getElementById('calendar-refresh-button');
+    const calendarStatus = document.getElementById('calendar-status');
+    const calendarList = document.getElementById('calendar-list');
 
     let supabaseClient;
     let currentSession = null;
     let currentProfile = null;
     let currentAttendance = null;
     let openPeople = [];
+    let calendarEvents = [];
 
     function setMessage(text, type = '') {
       messageElement.textContent = text;
@@ -530,6 +656,121 @@
       }).format(new Date(value));
     }
 
+    function taipeiDateString(value = new Date()) {
+      const parts = new Intl.DateTimeFormat('en', {
+        timeZone: 'Asia/Taipei',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+      }).formatToParts(value);
+      const partMap = Object.fromEntries(parts.map(part => [part.type, part.value]));
+      return `${partMap.year}-${partMap.month}-${partMap.day}`;
+    }
+
+    function setCalendarBusy(isBusy) {
+      calendarDate.disabled = isBusy;
+      calendarRefreshButton.disabled = isBusy;
+      calendarRefreshButton.textContent = isBusy ? '讀取中……' : '查看預約';
+    }
+
+    function setCalendarStatus(text, type = '') {
+      calendarStatus.textContent = text;
+      calendarStatus.className = `calendar-status${type ? ` ${type}` : ''}`;
+    }
+
+    async function getFunctionErrorMessage(error, fallbackMessage) {
+      const response = error?.context;
+
+      if (response && typeof response.clone === 'function') {
+        try {
+          const payload = await response.clone().json();
+          if (typeof payload?.error === 'string' && payload.error) {
+            return payload.error;
+          }
+        } catch {
+          // 無法解析時使用下方的一般錯誤訊息。
+        }
+      }
+
+      return error?.message || fallbackMessage;
+    }
+
+    function renderCalendarEvents(events) {
+      calendarList.replaceChildren();
+
+      for (const calendarEvent of events) {
+        const row = document.createElement('li');
+        const time = document.createElement('div');
+        const details = document.createElement('div');
+        const title = document.createElement('strong');
+
+        row.className = 'calendar-event';
+        time.className = 'calendar-event-time';
+        details.className = 'calendar-event-title';
+        time.textContent = calendarEvent.all_day
+          ? '全天'
+          : `${calendarEvent.start_label}–${calendarEvent.end_label}`;
+        title.textContent = calendarEvent.title || '未命名預約';
+
+        details.appendChild(title);
+
+        if (calendarEvent.all_day) {
+          const badge = document.createElement('span');
+          badge.textContent = '全天活動';
+          details.appendChild(document.createElement('br'));
+          details.appendChild(badge);
+        }
+
+        row.append(time, details);
+        calendarList.appendChild(row);
+      }
+    }
+
+    async function loadCalendarEvents() {
+      if (!currentSession) return;
+
+      const selectedDate = calendarDate.value;
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(selectedDate)) {
+        setCalendarStatus('請先選擇有效日期。', 'error');
+        return;
+      }
+
+      setCalendarBusy(true);
+      setCalendarStatus('正在讀取 Google Calendar……');
+
+      try {
+        const { data, error } = await supabaseClient.functions.invoke(
+          'get-calendar-events',
+          { body: { date: selectedDate } }
+        );
+
+        if (error) throw error;
+        if (!data?.ok || !Array.isArray(data.events)) {
+          throw new Error(data?.error || 'Calendar Function 回傳格式不正確');
+        }
+
+        calendarEvents = data.events;
+        renderCalendarEvents(calendarEvents);
+
+        if (calendarEvents.length === 0) {
+          setCalendarStatus('此日期沒有預約。');
+        } else {
+          setCalendarStatus(`已讀取 ${calendarEvents.length} 筆預約。`, 'success');
+        }
+      } catch (error) {
+        calendarEvents = [];
+        calendarList.replaceChildren();
+        const message = await getFunctionErrorMessage(
+          error,
+          '暫時無法讀取 Google Calendar'
+        );
+        console.error('Calendar loading failed', error);
+        setCalendarStatus(`讀取失敗：${message}`, 'error');
+      } finally {
+        setCalendarBusy(false);
+      }
+    }
+
     function roleLabel(role) {
       return role === 'primary' ? '主要借用者' : '共同使用者';
     }
@@ -539,6 +780,10 @@
       currentProfile = null;
       currentAttendance = null;
       openPeople = [];
+      calendarEvents = [];
+      calendarList.replaceChildren();
+      setCalendarBusy(false);
+      setCalendarStatus('登入後即可查看預約。');
       setBusy(false);
       signedOutCard.classList.remove('hidden');
       signedInArea.classList.add('hidden');
@@ -547,6 +792,7 @@
 
     function showSignedInShell(session) {
       currentSession = session;
+      if (!calendarDate.value) calendarDate.value = taipeiDateString();
       signedOutCard.classList.add('hidden');
       signedInArea.classList.remove('hidden');
 
@@ -776,6 +1022,7 @@
       if (data.session) {
         showSignedInShell(data.session);
         await loadAppState();
+        await loadCalendarEvents();
       } else {
         showSignedOut();
       }
@@ -783,7 +1030,10 @@
       supabaseClient.auth.onAuthStateChange((_event, session) => {
         if (session) {
           showSignedInShell(session);
-          window.setTimeout(() => loadAppState(), 0);
+          window.setTimeout(async () => {
+            await loadAppState();
+            await loadCalendarEvents();
+          }, 0);
         } else {
           showSignedOut();
         }
@@ -879,6 +1129,8 @@
 
     transferUser.addEventListener('change', updateEquipmentState);
     refreshButton.addEventListener('click', () => loadAppState());
+    calendarRefreshButton.addEventListener('click', loadCalendarEvents);
+    calendarDate.addEventListener('change', loadCalendarEvents);
 
     assistList.addEventListener('click', async event => {
       const button = event.target.closest('[data-assist-user-id]');
