@@ -346,6 +346,56 @@
       font-size: 0.72rem;
     }
 
+    .history-status {
+      margin: 10px 0;
+      color: #94a3b8;
+      font-size: 0.9rem;
+    }
+
+    .history-status.success {
+      color: #a7f3d0;
+    }
+
+    .history-status.error {
+      color: #fecaca;
+    }
+
+    .history-list {
+      display: grid;
+      gap: 10px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .history-row {
+      padding: 13px 14px;
+      background: #0f172a;
+      border: 1px solid #334155;
+      border-radius: 12px;
+    }
+
+    .history-name-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .history-time {
+      margin-top: 7px;
+      color: #e2e8f0;
+      font-size: 0.9rem;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .history-detail {
+      margin-top: 5px;
+      color: #94a3b8;
+      font-size: 0.82rem;
+      line-height: 1.5;
+    }
+
     .person-row {
       display: flex;
       align-items: center;
@@ -460,7 +510,7 @@
       <h1>運動科學實驗室簽到系統</h1>
       <p>
         請使用 Google 帳號完成身分驗證
-        <span class="version-label">v0.5 Google Calendar</span>
+        <span class="version-label">v0.6 簽到紀錄</span>
       </p>
     </header>
 
@@ -560,6 +610,28 @@
       </section>
 
       <section class="card">
+        <h2>簽到紀錄查詢</h2>
+        <p class="hint">
+          依日期查看簽到身分、進出時間、協助簽退與責任交接紀錄。
+        </p>
+
+        <div class="calendar-controls">
+          <label for="history-date">
+            查詢日期
+            <input id="history-date" type="date">
+          </label>
+          <button id="history-refresh-button" class="secondary-button" type="button">
+            查詢紀錄
+          </button>
+        </div>
+
+        <p id="history-status" class="history-status" aria-live="polite">
+          尚未讀取簽到紀錄。
+        </p>
+        <ul id="history-list" class="history-list"></ul>
+      </section>
+
+      <section class="card">
         <h2>協助他人簽退</h2>
         <p class="hint">
           只能協助其他共同使用者；主要借用者必須本人完成設備檢查與簽退。
@@ -620,6 +692,10 @@
     const calendarRefreshButton = document.getElementById('calendar-refresh-button');
     const calendarStatus = document.getElementById('calendar-status');
     const calendarList = document.getElementById('calendar-list');
+    const historyDate = document.getElementById('history-date');
+    const historyRefreshButton = document.getElementById('history-refresh-button');
+    const historyStatus = document.getElementById('history-status');
+    const historyList = document.getElementById('history-list');
 
     let supabaseClient;
     let currentSession = null;
@@ -627,6 +703,7 @@
     let currentAttendance = null;
     let openPeople = [];
     let calendarEvents = [];
+    let attendanceHistory = [];
 
     function setMessage(text, type = '') {
       messageElement.textContent = text;
@@ -771,6 +848,161 @@
       }
     }
 
+    function nextDateString(dateString) {
+      const [year, month, day] = dateString.split('-').map(Number);
+      const parsedDate = new Date(Date.UTC(year, month - 1, day));
+
+      if (
+        parsedDate.getUTCFullYear() !== year ||
+        parsedDate.getUTCMonth() !== month - 1 ||
+        parsedDate.getUTCDate() !== day
+      ) {
+        return null;
+      }
+
+      return new Date(Date.UTC(year, month - 1, day + 1))
+        .toISOString()
+        .slice(0, 10);
+    }
+
+    function setHistoryBusy(isBusy) {
+      historyDate.disabled = isBusy;
+      historyRefreshButton.disabled = isBusy;
+      historyRefreshButton.textContent = isBusy ? '讀取中……' : '查詢紀錄';
+    }
+
+    function setHistoryStatus(text, type = '') {
+      historyStatus.textContent = text;
+      historyStatus.className = `history-status${type ? ` ${type}` : ''}`;
+    }
+
+    function renderAttendanceHistory(records) {
+      historyList.replaceChildren();
+
+      for (const record of records) {
+        const row = document.createElement('li');
+        const heading = document.createElement('div');
+        const name = document.createElement('strong');
+        const role = document.createElement('span');
+        const time = document.createElement('div');
+        const detail = document.createElement('div');
+
+        row.className = 'history-row';
+        heading.className = 'history-name-row';
+        role.className = 'role-badge';
+        time.className = 'history-time';
+        detail.className = 'history-detail';
+
+        name.textContent = record.user_name;
+        role.textContent = roleLabel(record.gym_role);
+        time.textContent = record.checked_out_at
+          ? `${formatTime(record.checked_in_at)} 簽到 → ${formatTime(record.checked_out_at)} 簽退`
+          : `${formatTime(record.checked_in_at)} 簽到 → 尚未簽退`;
+
+        const detailParts = [];
+        if (!record.checked_out_at) {
+          detailParts.push('目前仍在場');
+        } else if (record.checkout_method === 'assisted') {
+          detailParts.push(`由「${record.checkout_name}」協助簽退`);
+        } else {
+          detailParts.push('本人簽退');
+        }
+
+        if (record.transferred_to) {
+          detailParts.push(`責任交接給「${record.transfer_name}」`);
+        } else if (
+          record.gym_role === 'primary' &&
+          record.checked_out_at &&
+          record.checkout_method === 'self'
+        ) {
+          detailParts.push('設備檢查完成');
+        }
+
+        detail.textContent = detailParts.join('｜');
+        heading.append(name, role);
+        row.append(heading, time, detail);
+        historyList.appendChild(row);
+      }
+    }
+
+    async function loadAttendanceHistory() {
+      if (!currentSession) return;
+
+      const selectedDate = historyDate.value;
+      const nextDate = /^\d{4}-\d{2}-\d{2}$/.test(selectedDate)
+        ? nextDateString(selectedDate)
+        : null;
+
+      if (!nextDate) {
+        setHistoryStatus('請先選擇有效日期。', 'error');
+        return;
+      }
+
+      setHistoryBusy(true);
+      setHistoryStatus('正在讀取簽到紀錄……');
+
+      try {
+        const { data: sessions, error: sessionsError } = await supabaseClient
+          .from('attendance_sessions')
+          .select(
+            'id, user_id, gym_role, checked_in_at, checked_out_at, ' +
+            'checked_out_by, checkout_method, transferred_to'
+          )
+          .gte('checked_in_at', `${selectedDate}T00:00:00+08:00`)
+          .lt('checked_in_at', `${nextDate}T00:00:00+08:00`)
+          .order('checked_in_at', { ascending: false })
+          .limit(200);
+
+        if (sessionsError) throw sessionsError;
+
+        const profileIds = [...new Set(
+          (sessions || []).flatMap(session => [
+            session.user_id,
+            session.checked_out_by,
+            session.transferred_to
+          ]).filter(Boolean)
+        )];
+
+        let profileMap = new Map();
+        if (profileIds.length > 0) {
+          const { data: profiles, error: profilesError } = await supabaseClient
+            .from('profiles')
+            .select('id, display_name')
+            .in('id', profileIds);
+
+          if (profilesError) throw profilesError;
+          profileMap = new Map(
+            (profiles || []).map(profile => [profile.id, profile.display_name])
+          );
+        }
+
+        attendanceHistory = (sessions || []).map(session => ({
+          ...session,
+          user_name: profileMap.get(session.user_id) || '未知使用者',
+          checkout_name: profileMap.get(session.checked_out_by) || '未知使用者',
+          transfer_name: profileMap.get(session.transferred_to) || '未知使用者'
+        }));
+
+        renderAttendanceHistory(attendanceHistory);
+
+        if (attendanceHistory.length === 0) {
+          setHistoryStatus('此日期沒有簽到紀錄。');
+        } else {
+          setHistoryStatus(
+            `已讀取 ${attendanceHistory.length} 筆簽到紀錄。`,
+            'success'
+          );
+        }
+      } catch (error) {
+        attendanceHistory = [];
+        historyList.replaceChildren();
+        console.error('Attendance history loading failed', error);
+        setHistoryStatus(`讀取失敗：${error.message}`, 'error');
+      } finally {
+        setHistoryBusy(false);
+      }
+    }
+
     function roleLabel(role) {
       return role === 'primary' ? '主要借用者' : '共同使用者';
     }
@@ -781,9 +1013,13 @@
       currentAttendance = null;
       openPeople = [];
       calendarEvents = [];
+      attendanceHistory = [];
       calendarList.replaceChildren();
+      historyList.replaceChildren();
       setCalendarBusy(false);
       setCalendarStatus('登入後即可查看預約。');
+      setHistoryBusy(false);
+      setHistoryStatus('登入後即可查看簽到紀錄。');
       setBusy(false);
       signedOutCard.classList.remove('hidden');
       signedInArea.classList.add('hidden');
@@ -793,6 +1029,7 @@
     function showSignedInShell(session) {
       currentSession = session;
       if (!calendarDate.value) calendarDate.value = taipeiDateString();
+      if (!historyDate.value) historyDate.value = taipeiDateString();
       signedOutCard.classList.add('hidden');
       signedInArea.classList.remove('hidden');
 
@@ -1022,7 +1259,10 @@
       if (data.session) {
         showSignedInShell(data.session);
         await loadAppState();
-        await loadCalendarEvents();
+        await Promise.all([
+          loadCalendarEvents(),
+          loadAttendanceHistory()
+        ]);
       } else {
         showSignedOut();
       }
@@ -1032,7 +1272,10 @@
           showSignedInShell(session);
           window.setTimeout(async () => {
             await loadAppState();
-            await loadCalendarEvents();
+            await Promise.all([
+              loadCalendarEvents(),
+              loadAttendanceHistory()
+            ]);
           }, 0);
         } else {
           showSignedOut();
@@ -1131,6 +1374,8 @@
     refreshButton.addEventListener('click', () => loadAppState());
     calendarRefreshButton.addEventListener('click', loadCalendarEvents);
     calendarDate.addEventListener('change', loadCalendarEvents);
+    historyRefreshButton.addEventListener('click', loadAttendanceHistory);
+    historyDate.addEventListener('change', loadAttendanceHistory);
 
     assistList.addEventListener('click', async event => {
       const button = event.target.closest('[data-assist-user-id]');
