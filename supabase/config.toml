@@ -2,3 +2,6 @@ project_id = "gym-checkin-webapp"
 
 [functions.send-issue-email]
 verify_jwt = true
+
+[functions.get-calendar-events]
+verify_jwt = true
