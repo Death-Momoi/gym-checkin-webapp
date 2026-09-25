@@ -21,7 +21,14 @@
     { key: 'assist', href: 'assist.html', icon: '↪', label: '協助簽退' },
     { key: 'calendar', href: 'calendar.html', icon: '▦', label: '預約月曆' },
     { key: 'history', href: 'history.html', icon: '≡', label: '簽到紀錄' },
-    { key: 'report', href: 'report.html', icon: '!', label: '問題回報' }
+    { key: 'report', href: 'report.html', icon: '!', label: '問題回報' },
+    {
+      key: 'admin',
+      href: 'admin.html',
+      icon: '⚙',
+      label: '問題回報管理',
+      adminOnly: true
+    }
   ];
 
   let client = null;
@@ -40,7 +47,7 @@
     const activePage = document.body.dataset.page || 'home';
     const pageTitle = document.body.dataset.title || '首頁';
     const navigation = NAV_ITEMS.map(item => `
-      <li>
+      <li${item.adminOnly ? ' class="admin-only hidden"' : ''}>
         <a href="./${item.href}" data-nav-key="${item.key}"
           ${item.key === activePage ? 'aria-current="page"' : ''}>
           <span class="nav-icon" aria-hidden="true">${item.icon}</span>
@@ -67,7 +74,7 @@
         <div class="drawer-header">
           <div class="drawer-brand">
             <strong>功能選單</strong>
-            <span>v0.7 多頁式介面</span>
+            <span>v0.8 管理員介面</span>
           </div>
           <button id="drawer-close-button" class="drawer-close-button"
             type="button" aria-label="關閉功能選單">×</button>
@@ -141,8 +148,14 @@
     if (!userArea || !logoutButton) return;
 
     const signedIn = Boolean(session);
+    const isAdmin = signedIn &&
+      profile?.app_role === 'admin' &&
+      profile?.status === 'active';
     userArea.classList.toggle('hidden', !signedIn);
     logoutButton.classList.toggle('hidden', !signedIn);
+    document.querySelectorAll('.admin-only').forEach(element => {
+      element.classList.toggle('hidden', !isAdmin);
+    });
 
     if (signedIn) {
       document.getElementById('topbar-user-name').textContent =

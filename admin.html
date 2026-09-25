@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>問題回報管理｜運動科學實驗室簽到系統</title>
+  <link rel="stylesheet" href="./assets/styles.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script defer src="./assets/common.js"></script>
+  <script defer src="./assets/admin.js"></script>
+</head>
+<body data-page="admin" data-title="問題回報管理">
+  <main class="page-container">
+    <div class="page-heading">
+      <h1>問題回報管理</h1>
+      <p>管理員可查看全部回報，並將問題標記為已解決或重新開啟。</p>
+    </div>
+
+    <div id="message" class="message hidden"></div>
+
+    <section id="admin-denied" class="card hidden">
+      <h2>無法開啟管理頁面</h2>
+      <p class="hint">這個頁面僅限狀態為 active 的管理員使用。</p>
+      <a class="button-link secondary-button" href="./index.html">返回首頁</a>
+    </section>
+
+    <section id="admin-content" class="card hidden">
+      <div class="admin-toolbar">
+        <label for="issue-status-filter">
+          顯示狀態
+          <select id="issue-status-filter">
+            <option value="open">待處理</option>
+            <option value="resolved">已解決</option>
+            <option value="all">全部</option>
+          </select>
+        </label>
+        <button id="issue-refresh-button" class="secondary-button" type="button">
+          重新整理
+        </button>
+      </div>
+
+      <p id="issue-admin-status" class="section-status" aria-live="polite">
+        正在讀取問題回報……
+      </p>
+      <ul id="issue-admin-list" class="admin-issue-list"></ul>
+    </section>
+  </main>
+</body>
+</html>

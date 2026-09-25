@@ -465,7 +465,8 @@ button:disabled {
 
 .people-list,
 .calendar-list,
-.history-list {
+.history-list,
+.admin-issue-list {
   display: grid;
   gap: 10px;
   margin: 0;
@@ -625,6 +626,91 @@ button:disabled {
   line-height: 1.5;
 }
 
+.admin-toolbar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.admin-toolbar button {
+  width: auto;
+  min-width: 120px;
+  margin-bottom: 5px;
+}
+
+.admin-issue-row {
+  padding: 15px;
+  background: #0f172a;
+  border: 1px solid #334155;
+  border-left: 4px solid #f59e0b;
+  border-radius: 12px;
+}
+
+.admin-issue-row.resolved {
+  border-left-color: #10b981;
+}
+
+.admin-issue-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.admin-issue-reporter strong,
+.admin-issue-reporter span,
+.admin-issue-meta span {
+  display: block;
+}
+
+.admin-issue-time {
+  margin-top: 4px;
+  color: #94a3b8;
+  font-size: 0.8rem;
+}
+
+.status-badge.success {
+  color: #d1fae5;
+  background: #065f46;
+}
+
+.admin-issue-description {
+  margin: 13px 0;
+  padding: 12px;
+  color: #f1f5f9;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  background: #111827;
+  border-radius: 10px;
+}
+
+.admin-issue-meta {
+  display: grid;
+  gap: 5px;
+  color: #94a3b8;
+  font-size: 0.8rem;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.notification-state.error {
+  color: #fca5a5;
+}
+
+.admin-issue-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 13px;
+}
+
+.issue-status-button {
+  width: auto;
+  min-width: 150px;
+}
+
 .shortcut-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -685,11 +771,17 @@ button:disabled {
 
   .role-options,
   .date-controls,
+  .admin-toolbar,
   .shortcut-grid {
     grid-template-columns: 1fr;
   }
 
   .date-controls button {
+    width: 100%;
+  }
+
+  .admin-toolbar button,
+  .issue-status-button {
     width: 100%;
   }
 

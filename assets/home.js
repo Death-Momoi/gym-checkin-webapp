@@ -8,6 +8,7 @@
   const signedInContent = document.getElementById('signed-in-content');
   const loginButton = document.getElementById('login-button');
   const logoutButton = document.getElementById('home-logout-button');
+  const adminShortcut = document.getElementById('admin-shortcut');
 
   if (!app.session) {
     signedOutCard.classList.remove('hidden');
@@ -27,6 +28,10 @@
 
     signedOutCard.classList.add('hidden');
     signedInContent.classList.remove('hidden');
+    adminShortcut.classList.toggle(
+      'hidden',
+      app.profile?.app_role !== 'admin' || app.profile?.status !== 'active'
+    );
 
     document.getElementById('home-name').textContent =
       GymApp.profileName(app.profile, app.session);
