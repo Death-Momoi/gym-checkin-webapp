@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>美食轉盤｜運動科學實驗室簽到系統</title>
+  <link rel="stylesheet" href="./assets/styles.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script defer src="./assets/common.js"></script>
+  <script defer src="./assets/foodwheel.js"></script>
+</head>
+<body data-page="foodwheel" data-title="美食轉盤">
+  <main class="page-container food-wheel-page">
+    <div class="page-heading">
+      <h1>美食轉盤</h1>
+      <p>今天吃什麼？選擇飲食分類，或建立自己的店家轉盤。</p>
+    </div>
+
+    <div id="message" class="message hidden"></div>
+
+    <section id="food-selection-card" class="card">
+      <fieldset class="food-category-fieldset">
+        <legend>選擇飲食分類</legend>
+        <p class="hint">可複選，系統會合併各分類並排除重複店家。</p>
+
+        <div class="food-category-grid">
+          <label class="food-category-option expensive">
+            <input class="food-category-checkbox" type="checkbox" value="今天吃貴一點">
+            <span aria-hidden="true">🍽️</span>
+            <strong>今天吃貴一點</strong>
+          </label>
+          <label class="food-category-option casual">
+            <input class="food-category-checkbox" type="checkbox" value="隨便吃一吃">
+            <span aria-hidden="true">🍔</span>
+            <strong>隨便吃一吃</strong>
+          </label>
+          <label class="food-category-option clean">
+            <input class="food-category-checkbox" type="checkbox" value="吃乾淨一點">
+            <span aria-hidden="true">🥗</span>
+            <strong>吃乾淨一點</strong>
+          </label>
+          <label class="food-category-option budget">
+            <input class="food-category-checkbox" type="checkbox" value="月底救星">
+            <span aria-hidden="true">🪙</span>
+            <strong>月底救星</strong>
+          </label>
+        </div>
+      </fieldset>
+
+      <p id="food-category-summary" class="food-category-summary">尚未選擇分類</p>
+
+      <div class="food-selection-actions">
+        <button id="food-preset-button" class="food-accent-button" type="button">
+          產生預設轉盤
+        </button>
+        <button id="food-custom-toggle-button" class="secondary-button" type="button"
+          aria-controls="food-custom-panel" aria-expanded="false">
+          自訂轉盤
+        </button>
+      </div>
+
+      <div id="food-custom-panel" class="food-custom-panel hidden">
+        <div class="food-custom-header">
+          <label for="food-custom-input">自訂店家</label>
+          <button id="food-custom-close-button" class="food-icon-button" type="button"
+            aria-label="關閉自訂店家">×</button>
+        </div>
+        <p class="hint">每家店使用換行、逗號或分號分隔，至少需要兩家不同的店家。</p>
+        <textarea id="food-custom-input" maxlength="2000"
+          placeholder="例如：7-11，全家，萊爾富，合作社"></textarea>
+        <div class="food-custom-actions">
+          <button id="food-custom-clear-button" class="secondary-button" type="button">清空</button>
+          <button id="food-custom-apply-button" class="primary-button" type="button">
+            套用自訂店家
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <section id="food-wheel-stage" class="card food-wheel-stage hidden">
+      <div class="food-wheel-toolbar">
+        <div>
+          <strong id="food-wheel-mode-label">預設轉盤</strong>
+          <span id="food-wheel-count-label">共 0 間店家</span>
+        </div>
+        <button id="food-wheel-reset-button" class="secondary-button" type="button">
+          重新選擇
+        </button>
+      </div>
+
+      <div class="food-wheel-wrap">
+        <div class="food-wheel-pointer" aria-hidden="true"></div>
+        <canvas id="food-wheel-canvas" class="food-wheel-canvas"
+          width="420" height="420" aria-label="美食轉盤"></canvas>
+        <button id="food-wheel-center-button" class="food-wheel-center-button" type="button">
+          <span aria-hidden="true">▶</span>
+          <span>開轉</span>
+        </button>
+      </div>
+
+      <div id="food-wheel-result" class="food-wheel-result" aria-live="polite">
+        <span class="food-result-icon" aria-hidden="true">🍽️</span>
+        <span>按下轉盤中央開始抽選</span>
+      </div>
+    </section>
+  </main>
+
+  <div id="food-celebration-layer" class="food-celebration-layer"
+    aria-hidden="true"></div>
+</body>
+</html>

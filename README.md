@@ -14,6 +14,7 @@ Supabase 作為驗證、PostgreSQL 資料庫與 Edge Functions 後端。
 - `present.html`：目前在場人員
 - `assist.html`：協助共同使用者簽退
 - `calendar.html`：Google Calendar 預約查詢
+- `foodwheel.html`：預設分類與自訂店家的美食轉盤
 - `history.html`：依日期查詢簽到紀錄
 - `report.html`：問題回報與 Gmail 通知
 - `admin.html`：管理員查看全部回報並更新處理狀態

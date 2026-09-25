@@ -20,6 +20,7 @@
     { key: 'present', href: 'present.html', icon: '●', label: '目前在場' },
     { key: 'assist', href: 'assist.html', icon: '↪', label: '協助簽退' },
     { key: 'calendar', href: 'calendar.html', icon: '▦', label: '預約月曆' },
+    { key: 'foodwheel', href: 'foodwheel.html', icon: '◉', label: '美食轉盤' },
     { key: 'history', href: 'history.html', icon: '≡', label: '簽到紀錄' },
     { key: 'report', href: 'report.html', icon: '!', label: '問題回報' },
     {
@@ -74,7 +75,7 @@
         <div class="drawer-header">
           <div class="drawer-brand">
             <strong>功能選單</strong>
-            <span>v0.9 OAuth 正式化</span>
+            <span>v1.0 功能移轉完成</span>
           </div>
           <button id="drawer-close-button" class="drawer-close-button"
             type="button" aria-label="關閉功能選單">×</button>
