@@ -17,6 +17,8 @@ Supabase 作為驗證、PostgreSQL 資料庫與 Edge Functions 後端。
 - `history.html`：依日期查詢簽到紀錄
 - `report.html`：問題回報與 Gmail 通知
 - `admin.html`：管理員查看全部回報並更新處理狀態
+- `privacy.html`：公開的隱私權政策與 Google API 資料使用說明
+- `terms.html`：公開的服務條款
 
 所有頁面共用 `assets/common.js` 的 Supabase 登入狀態與左側滑出功能列，
 視覺樣式集中於 `assets/styles.css`。

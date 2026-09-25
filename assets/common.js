@@ -74,7 +74,7 @@
         <div class="drawer-header">
           <div class="drawer-brand">
             <strong>功能選單</strong>
-            <span>v0.8 管理員介面</span>
+            <span>v0.9 OAuth 正式化</span>
           </div>
           <button id="drawer-close-button" class="drawer-close-button"
             type="button" aria-label="關閉功能選單">×</button>
@@ -83,6 +83,10 @@
           <ul class="drawer-nav">${navigation}</ul>
         </nav>
         <div class="drawer-footer">
+          <div class="drawer-legal-links">
+            <a href="./privacy.html">隱私權政策</a>
+            <a href="./terms.html">服務條款</a>
+          </div>
           <button id="drawer-logout-button" class="secondary-button hidden" type="button">
             登出 Google 帳號
           </button>
