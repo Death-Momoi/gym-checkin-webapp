@@ -9,8 +9,9 @@ Supabase 作為驗證、PostgreSQL 資料庫與 Edge Functions 後端。
 
 ## 功能頁面
 
-- `index.html`：Google 登入與首頁捷徑
-- `checkin.html`：簽到、簽退、設備檢查與責任交接
+- `index.html`：Google 登入／登出、簽到、簽退、設備檢查與責任交接
+- `checkin.html`：保留舊版簽到／簽退直接連結的相容頁面
+- `overview.html`：以當日時間軸同時顯示實際使用與 Google Calendar 預約
 - `present.html`：目前在場人員
 - `assist.html`：協助共同使用者簽退
 - `calendar.html`：Google Calendar 預約查詢
@@ -18,10 +19,13 @@ Supabase 作為驗證、PostgreSQL 資料庫與 Edge Functions 後端。
 - `history.html`：依日期查詢簽到紀錄
 - `report.html`：問題回報與 Gmail 通知
 - `admin.html`：管理員查看全部回報並更新處理狀態
+- `guide.html`：系統用途、簽到流程與功能使用說明
 - `privacy.html`：公開的隱私權政策與 Google API 資料使用說明
 - `terms.html`：公開的服務條款
 
-所有頁面共用 `assets/common.js` 的 Supabase 登入狀態與左側滑出功能列，
+「總覽圖表」、「目前在場」、「預約月曆」與「簽到紀錄」收納於
+左側功能列的「借用狀態」子選單。所有頁面共用 `assets/common.js`
+的 Supabase 登入狀態與左側滑出功能列，
 視覺樣式集中於 `assets/styles.css`。
 
 ## 後端

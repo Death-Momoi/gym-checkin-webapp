@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>系統使用說明｜運動科學實驗室簽到系統</title>
+  <link rel="stylesheet" href="./assets/styles.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script defer src="./assets/common.js"></script>
+  <script defer src="./assets/guide.js"></script>
+</head>
+<body data-page="guide" data-title="系統使用說明">
+  <main class="page-container guide-page">
+    <div class="page-heading">
+      <h1>系統使用說明</h1>
+      <p>了解本系統的用途、簽到流程與各項功能。</p>
+    </div>
+
+    <div id="message" class="message hidden"></div>
+
+    <section class="card guide-section">
+      <h2>系統用途</h2>
+      <p>
+        本系統用於運動科學實驗室的人員簽到、簽退與借用狀態查詢，
+        並整合 Google Calendar 預約、問題回報與 Gmail 通知。
+      </p>
+      <p>
+        每位使用者都必須使用 Google 帳號登入。系統由 GitHub Pages 提供網頁，
+        並由 Supabase 處理身分驗證、資料庫與後端功能。
+      </p>
+    </section>
+
+    <section class="card guide-section">
+      <h2>基本簽到流程</h2>
+      <ol class="guide-steps">
+        <li>掃描網址後，在首頁按「使用 Google 帳號登入」。</li>
+        <li>選擇「共同使用者」或「主要借用者」，再按「簽到」。</li>
+        <li>使用完畢回到首頁簽退。</li>
+        <li>
+          主要借用者離開時，必須選擇責任交接，或完成垃圾、
+          冷氣與電燈、除濕機三項檢查。
+        </li>
+        <li>確認簽退成功後，即可登出 Google 帳號。</li>
+      </ol>
+    </section>
+
+    <section class="card guide-section">
+      <h2>借用狀態</h2>
+      <p>點選左上角功能列的「借用狀態」，可展開四個子功能：</p>
+      <ul class="guide-feature-list">
+        <li><strong>總覽圖表：</strong>在同一時間軸比對實際使用時間與預約時段，點選長條可看詳細資訊。</li>
+        <li><strong>目前在場：</strong>查看尚未簽退的人員與使用身分。</li>
+        <li><strong>預約月曆：</strong>依日期查詢 Google Calendar 預約。</li>
+        <li><strong>簽到紀錄：</strong>依日期查看簽到、簽退、協助簽退與責任交接紀錄。</li>
+      </ul>
+
+      <div class="guide-color-list" aria-label="總覽圖表顏色說明">
+        <span><i class="status-completed"></i>青色：已簽退</span>
+        <span><i class="status-ongoing"></i>綠色：使用中</span>
+        <span><i class="status-overtime"></i>紅色：超過 2 小時</span>
+        <span><i class="status-forgotten"></i>黃色：忘記簽退或跨日</span>
+        <span><i class="status-reservation"></i>紫色：Google Calendar 預約</span>
+      </div>
+    </section>
+
+    <section class="card guide-section">
+      <h2>其他功能</h2>
+      <ul class="guide-feature-list">
+        <li><strong>協助簽退：</strong>可協助已離開的共同使用者簽退；主要借用者必須親自處理。</li>
+        <li><strong>問題回報：</strong>儲存設備或環境問題，並寄送 Gmail 通知。</li>
+        <li><strong>美食轉盤：</strong>使用預設分類或自訂店家決定用餐選項。</li>
+        <li><strong>問題回報管理：</strong>僅管理員可查看全部回報並更新處理狀態。</li>
+      </ul>
+    </section>
+
+    <section class="card guide-section">
+      <h2>資料與使用規範</h2>
+      <p>
+        請勿代替他人建立不實簽到紀錄。使用「協助簽退」前，
+        請先確認對方已經離開。
+      </p>
+      <div class="legal-links">
+        <a href="./privacy.html">隱私權政策</a>
+        <a href="./terms.html">服務條款</a>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

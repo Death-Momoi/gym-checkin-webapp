@@ -3,46 +3,34 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>首頁｜運動科學實驗室簽到系統</title>
+  <title>簽到／簽退｜運動科學實驗室簽到系統</title>
   <link rel="stylesheet" href="./assets/styles.css">
   <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script defer src="./assets/common.js"></script>
   <script defer src="./assets/home.js"></script>
 </head>
-<body data-page="home" data-title="首頁">
-  <main class="page-container">
-    <div class="page-heading">
+<body data-page="home" data-title="簽到／簽退">
+  <main class="page-container home-checkin-page">
+    <div class="page-heading home-system-heading">
       <h1>運動科學實驗室簽到系統</h1>
-      <p>使用左上角功能列切換各項功能，每位使用者皆須使用 Google 帳號登入。</p>
+      <p>進入實驗室後請先使用 Google 帳號登入並完成簽到；離開前請記得簽退。</p>
     </div>
 
     <div id="message" class="message">正在初始化……</div>
 
-    <section class="card public-summary">
-      <h2>系統用途</h2>
-      <p>
-        本系統用於運動科學實驗室的人員簽到與簽退，並提供在場查詢、
-        Google Calendar 預約查詢、問題回報與 Gmail 通知。
-      </p>
-      <p class="hint">
-        系統以 Google 帳號確認使用者身分，並由 Supabase 儲存必要的簽到與回報資料。
-      </p>
-      <div class="legal-links">
-        <a href="./privacy.html">隱私權政策</a>
-        <a href="./terms.html">服務條款</a>
-      </div>
-    </section>
-
     <section id="signed-out-card" class="card hidden">
       <h2>Google 帳號登入</h2>
-      <p class="hint">登入後才能使用簽到、預約查詢及問題回報等功能。</p>
+      <p class="hint">每位使用者都必須先登入，系統才能確認簽到身分。</p>
       <button id="login-button" class="google-button" type="button">
         使用 Google 帳號登入
       </button>
+      <p class="home-guide-link">
+        第一次使用？<a href="./guide.html">查看系統使用說明</a>
+      </p>
     </section>
 
     <div id="signed-in-content" class="hidden">
-      <section class="card">
+      <section class="card home-identity-card">
         <div class="identity">
           <img id="home-avatar" class="avatar" alt="使用者頭像">
           <div>
@@ -50,46 +38,62 @@
             <span id="home-email">—</span>
           </div>
         </div>
-        <div id="home-attendance-state" class="state-box">正在讀取簽到狀態……</div>
-        <button id="home-logout-button" class="secondary-button" type="button">登出</button>
+        <button id="home-logout-button" class="secondary-button" type="button">
+          登出 Google 帳號
+        </button>
       </section>
 
       <section class="card">
-        <h2>功能捷徑</h2>
-        <div class="shortcut-grid">
-          <a class="shortcut-card" href="./checkin.html">
-            <strong>簽到／簽退</strong>
-            <span>選擇使用身分、責任交接及設備檢查。</span>
-          </a>
-          <a class="shortcut-card" href="./present.html">
-            <strong>目前在場</strong>
-            <span>查看現在仍在健身房內的人員。</span>
-          </a>
-          <a class="shortcut-card" href="./assist.html">
-            <strong>協助簽退</strong>
-            <span>協助忘記操作的共同使用者完成簽退。</span>
-          </a>
-          <a class="shortcut-card" href="./calendar.html">
-            <strong>預約月曆</strong>
-            <span>查詢指定日期的 Google Calendar 預約。</span>
-          </a>
-          <a class="shortcut-card" href="./foodwheel.html">
-            <strong>美食轉盤</strong>
-            <span>複選飲食分類或輸入自訂店家，隨機決定今天吃什麼。</span>
-          </a>
-          <a class="shortcut-card" href="./history.html">
-            <strong>簽到紀錄</strong>
-            <span>依日期查詢過去的簽到與簽退紀錄。</span>
-          </a>
-          <a class="shortcut-card" href="./report.html">
-            <strong>問題回報</strong>
-            <span>回報設備或環境異常並寄送 Gmail 通知。</span>
-          </a>
-          <a id="admin-shortcut" class="shortcut-card hidden" href="./admin.html">
-            <strong>問題回報管理</strong>
-            <span>查看全部回報，並切換待處理與已解決狀態。</span>
-          </a>
+        <h2>簽到／簽退</h2>
+        <div id="attendance-state" class="state-box">正在讀取簽到狀態……</div>
+
+        <div id="check-in-controls" class="hidden">
+          <p class="hint">請選擇本次使用身分：</p>
+          <div class="role-options">
+            <label class="role-option">
+              <input type="radio" name="gym-role" value="member" checked>
+              共同使用者
+            </label>
+            <label class="role-option">
+              <input type="radio" name="gym-role" value="primary">
+              主要借用者
+            </label>
+          </div>
+          <button id="check-in-button" class="primary-button" type="button">簽到</button>
         </div>
+
+        <div id="check-out-controls" class="hidden">
+          <div id="primary-checkout-controls" class="hidden">
+            <p class="hint">
+              如果現場有人可以接替，可選擇責任交接；否則請完成三項設備檢查。
+            </p>
+            <label for="transfer-user">責任交接（選填）</label>
+            <select id="transfer-user">
+              <option value="">不交接，由我完成設備檢查</option>
+            </select>
+
+            <div id="equipment-checks" class="checks">
+              <label class="check-option">
+                <input id="trash-check" type="checkbox">
+                垃圾已清理
+              </label>
+              <label class="check-option">
+                <input id="ac-lights-check" type="checkbox">
+                冷氣與電燈已關閉
+              </label>
+              <label class="check-option">
+                <input id="dehumidifier-check" type="checkbox">
+                除濕機已開啟
+              </label>
+            </div>
+          </div>
+
+          <button id="check-out-button" class="danger-button" type="button">簽退</button>
+        </div>
+
+        <button id="refresh-button" class="secondary-button" type="button">
+          重新整理簽到狀態
+        </button>
       </section>
     </div>
   </main>

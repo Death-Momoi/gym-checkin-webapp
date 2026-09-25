@@ -15,14 +15,22 @@
     );
 
   const NAV_ITEMS = [
-    { key: 'home', href: 'index.html', icon: '⌂', label: '首頁' },
-    { key: 'checkin', href: 'checkin.html', icon: '✓', label: '簽到／簽退' },
-    { key: 'present', href: 'present.html', icon: '●', label: '目前在場' },
+    { key: 'home', href: 'index.html', icon: '✓', label: '簽到／簽退' },
+    {
+      key: 'borrowing',
+      icon: '▤',
+      label: '借用狀態',
+      children: [
+        { key: 'overview', href: 'overview.html', icon: '▥', label: '總覽圖表' },
+        { key: 'present', href: 'present.html', icon: '●', label: '目前在場' },
+        { key: 'calendar', href: 'calendar.html', icon: '▦', label: '預約月曆' },
+        { key: 'history', href: 'history.html', icon: '≡', label: '簽到紀錄' }
+      ]
+    },
     { key: 'assist', href: 'assist.html', icon: '↪', label: '協助簽退' },
-    { key: 'calendar', href: 'calendar.html', icon: '▦', label: '預約月曆' },
     { key: 'foodwheel', href: 'foodwheel.html', icon: '◉', label: '美食轉盤' },
-    { key: 'history', href: 'history.html', icon: '≡', label: '簽到紀錄' },
     { key: 'report', href: 'report.html', icon: '!', label: '問題回報' },
+    { key: 'guide', href: 'guide.html', icon: '?', label: '系統使用說明' },
     {
       key: 'admin',
       href: 'admin.html',
@@ -47,22 +55,55 @@
 
     const activePage = document.body.dataset.page || 'home';
     const pageTitle = document.body.dataset.title || '首頁';
-    const navigation = NAV_ITEMS.map(item => `
-      <li${item.adminOnly ? ' class="admin-only hidden"' : ''}>
-        <a href="./${item.href}" data-nav-key="${item.key}"
-          ${item.key === activePage ? 'aria-current="page"' : ''}>
-          <span class="nav-icon" aria-hidden="true">${item.icon}</span>
-          <span>${item.label}</span>
-        </a>
-      </li>
-    `).join('');
+    const navigation = NAV_ITEMS.map(item => {
+      if (Array.isArray(item.children)) {
+        const groupIsActive = item.children.some(child => child.key === activePage);
+        const children = item.children.map(child => `
+          <li>
+            <a href="./${child.href}" data-nav-key="${child.key}"
+              ${child.key === activePage ? 'aria-current="page"' : ''}>
+              <span class="nav-icon" aria-hidden="true">${child.icon}</span>
+              <span>${child.label}</span>
+            </a>
+          </li>
+        `).join('');
+
+        return `
+          <li class="drawer-nav-group${groupIsActive ? ' active' : ''}">
+            <button class="drawer-submenu-toggle" type="button"
+              data-submenu-toggle="${item.key}"
+              aria-controls="drawer-subnav-${item.key}"
+              aria-expanded="${String(groupIsActive)}">
+              <span class="nav-icon" aria-hidden="true">${item.icon}</span>
+              <span>${item.label}</span>
+              <span class="nav-chevron" aria-hidden="true">›</span>
+            </button>
+            <ul id="drawer-subnav-${item.key}"
+              class="drawer-subnav${groupIsActive ? '' : ' hidden'}">
+              ${children}
+            </ul>
+          </li>
+        `;
+      }
+
+      return `
+        <li${item.adminOnly ? ' class="admin-only hidden"' : ''}>
+          <a href="./${item.href}" data-nav-key="${item.key}"
+            ${item.key === activePage ? 'aria-current="page"' : ''}>
+            <span class="nav-icon" aria-hidden="true">${item.icon}</span>
+            <span>${item.label}</span>
+          </a>
+        </li>
+      `;
+    }).join('');
 
     document.body.insertAdjacentHTML('afterbegin', `
       <header class="topbar">
         <button id="menu-button" class="menu-button" type="button"
           aria-label="開啟功能選單" aria-controls="side-drawer" aria-expanded="false">☰</button>
         <div class="topbar-title">
-          <span class="site-name">運科二簽到系統｜</span>${pageTitle}
+          <span class="site-name">運動科學實驗室簽到系統</span>
+          <span class="page-context">｜${pageTitle}</span>
         </div>
         <div id="topbar-user" class="topbar-user hidden">
           <img id="topbar-avatar" alt="使用者頭像">
@@ -75,7 +116,7 @@
         <div class="drawer-header">
           <div class="drawer-brand">
             <strong>功能選單</strong>
-            <span>v1.0 功能移轉完成</span>
+            <span>v1.1 借用狀態總覽</span>
           </div>
           <button id="drawer-close-button" class="drawer-close-button"
             type="button" aria-label="關閉功能選單">×</button>
@@ -116,6 +157,19 @@
     closeButton.addEventListener('click', () => setDrawerOpen(false));
     overlay.addEventListener('click', () => setDrawerOpen(false));
     drawer.addEventListener('click', event => {
+      const submenuToggle = event.target.closest('[data-submenu-toggle]');
+      if (submenuToggle) {
+        const submenu = document.getElementById(
+          `drawer-subnav-${submenuToggle.dataset.submenuToggle}`
+        );
+        const shouldOpen = submenu.classList.contains('hidden');
+        submenu.classList.toggle('hidden', !shouldOpen);
+        submenuToggle.setAttribute('aria-expanded', String(shouldOpen));
+        submenuToggle.closest('.drawer-nav-group')
+          ?.classList.toggle('expanded', shouldOpen);
+        return;
+      }
+
       if (event.target.closest('a')) setDrawerOpen(false);
     });
     document.addEventListener('keydown', event => {

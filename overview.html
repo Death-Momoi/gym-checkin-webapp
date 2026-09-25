@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>總覽圖表｜運動科學實驗室簽到系統</title>
+  <link rel="stylesheet" href="./assets/styles.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script defer src="./assets/common.js"></script>
+  <script defer src="./assets/overview.js"></script>
+</head>
+<body data-page="overview" data-title="借用狀態｜總覽圖表">
+  <main class="page-container overview-page">
+    <div class="page-heading">
+      <h1>借用人員總覽圖表</h1>
+      <p>以同一時間軸對照實際簽到／簽退時間與 Google Calendar 預約時段。</p>
+    </div>
+
+    <div id="message" class="message">正在讀取圖表……</div>
+
+    <section class="card overview-controls-card">
+      <label for="overview-date">查詢日期</label>
+      <div class="overview-date-controls">
+        <button id="overview-previous-button" class="secondary-button" type="button"
+          aria-label="前一天">‹ 前一天</button>
+        <input id="overview-date" type="date">
+        <button id="overview-next-button" class="secondary-button" type="button"
+          aria-label="後一天">後一天 ›</button>
+        <button id="overview-refresh-button" class="primary-button" type="button">
+          重新讀取
+        </button>
+      </div>
+      <p id="overview-status" class="section-status" aria-live="polite"></p>
+    </section>
+
+    <section class="card overview-chart-card">
+      <div class="overview-chart-heading">
+        <div>
+          <h2>當日借用狀態</h2>
+          <p class="hint">手機可在圖表上左右滑動；點選任一長條可查看詳細資訊。</p>
+        </div>
+      </div>
+
+      <div class="timeline-legend" aria-label="借用狀態圖例">
+        <span><i class="status-completed"></i>已簽退</span>
+        <span><i class="status-ongoing"></i>使用中</span>
+        <span><i class="status-overtime"></i>超過 2 小時</span>
+        <span><i class="status-forgotten"></i>忘記簽退／跨日</span>
+        <span><i class="status-reservation"></i>預約</span>
+      </div>
+
+      <div id="overview-empty" class="empty-text overview-empty hidden">
+        這個日期沒有簽到紀錄或預約。
+      </div>
+
+      <div id="overview-timeline-scroll" class="timeline-scroll" tabindex="0"
+        aria-label="當日借用與預約時間軸">
+        <div id="overview-timeline-board" class="timeline-board">
+          <div class="timeline-axis-row">
+            <div class="timeline-sticky-label timeline-axis-label">時間</div>
+            <div id="overview-time-axis" class="timeline-axis-track"></div>
+          </div>
+
+          <div class="timeline-section-title">簽到人員使用時間</div>
+          <div id="overview-usage-rows"></div>
+
+          <div class="timeline-section-title reservation-title">
+            Google Calendar 預約時間
+          </div>
+          <div id="overview-reservation-rows"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <dialog id="overview-detail-dialog" class="timeline-dialog"
+    aria-labelledby="overview-dialog-title">
+    <div class="timeline-dialog-header">
+      <h2 id="overview-dialog-title">詳細資訊</h2>
+      <button id="overview-dialog-close-icon" class="food-icon-button" type="button"
+        aria-label="關閉詳細資訊">×</button>
+    </div>
+    <div id="overview-dialog-body" class="timeline-dialog-body"></div>
+    <button id="overview-dialog-close-button" class="primary-button" type="button">
+      關閉
+    </button>
+  </dialog>
+</body>
+</html>
