@@ -457,6 +457,7 @@ input[type="date"],
 #calendar-date,
 #history-date,
 #overview-date,
+#issue-date-filter,
 select,
 textarea {
   width: 100%;
@@ -472,7 +473,8 @@ select,
 input[type="date"],
 #calendar-date,
 #history-date,
-#overview-date {
+#overview-date,
+#issue-date-filter {
   margin: 7px 0 5px;
 }
 
@@ -840,6 +842,45 @@ span.flatpickr-weekday {
   width: auto;
   min-width: 120px;
   margin-bottom: 5px;
+}
+
+.permission-note {
+  margin: 0 0 16px;
+  padding: 11px 13px;
+  color: #cbd5e1;
+  background: #0f172a;
+  border: 1px solid #334155;
+  border-radius: 10px;
+  font-size: 0.85rem;
+  line-height: 1.55;
+}
+
+.permission-note.admin-mode {
+  color: #a7f3d0;
+  border-color: #047857;
+}
+
+.permission-note.viewer-mode {
+  color: #fde68a;
+  border-color: #92400e;
+}
+
+.issue-filter-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.issue-filter-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+  margin-top: 8px;
+}
+
+.issue-filter-actions button {
+  width: auto;
+  min-width: 120px;
 }
 
 .admin-issue-row {
@@ -1773,6 +1814,7 @@ span.flatpickr-weekday {
   .role-options,
   .date-controls,
   .admin-toolbar,
+  .issue-filter-fields,
   .food-category-grid,
   .food-selection-actions,
   .shortcut-grid {
@@ -1784,8 +1826,14 @@ span.flatpickr-weekday {
   }
 
   .admin-toolbar button,
+  .issue-filter-actions button,
   .issue-status-button {
     width: 100%;
+  }
+
+  .issue-filter-actions {
+    display: grid;
+    grid-template-columns: 1fr;
   }
 
   .food-custom-actions {

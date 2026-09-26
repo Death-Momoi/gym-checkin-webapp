@@ -472,34 +472,8 @@
     }
   }
 
-  async function loadCalendarActiveDates({ month }) {
-    const { data, error } = await GymApp.invokeUserFunction(
-      'get-calendar-events',
-      { mode: 'active_dates', month }
-    );
-    if (error) throw error;
-    if (!data?.ok || !Array.isArray(data.active_dates)) {
-      throw new Error(data?.error || 'Calendar Function 回傳格式不正確');
-    }
-    return data.active_dates;
-  }
-
   async function loadOverviewActiveDates(range) {
-    const results = await Promise.allSettled([
-      GymApp.loadAttendanceActiveDates(range.start, range.end),
-      loadCalendarActiveDates(range)
-    ]);
-    const dates = new Set();
-    results.forEach(result => {
-      if (result.status === 'fulfilled') {
-        result.value.forEach(date => dates.add(date));
-      }
-    });
-
-    if (results.every(result => result.status === 'rejected')) {
-      throw results[0].reason;
-    }
-    return [...dates];
+    return GymApp.loadAttendanceActiveDates(range.start, range.end);
   }
 
   function changeDate(direction) {

@@ -4,22 +4,22 @@
   const app = await GymApp.init();
   if (!app) return;
 
-  const denied = document.getElementById('admin-denied');
-  const content = document.getElementById('admin-content');
   const filter = document.getElementById('issue-status-filter');
+  const dateInput = document.getElementById('issue-date-filter');
+  const dateSearchButton = document.getElementById('issue-date-search-button');
+  const dateClearButton = document.getElementById('issue-date-clear-button');
   const refreshButton = document.getElementById('issue-refresh-button');
+  const permissionNote = document.getElementById('issue-permission-note');
   const status = document.getElementById('issue-admin-status');
   const list = document.getElementById('issue-admin-list');
   const isAdmin = app.profile?.app_role === 'admin' &&
     app.profile?.status === 'active';
+  let datePicker = null;
 
-  if (!isAdmin) {
-    denied.classList.remove('hidden');
-    GymApp.setMessage('你的帳號沒有管理員權限。', 'error');
-    return;
-  }
-
-  content.classList.remove('hidden');
+  permissionNote.textContent = isAdmin
+    ? '你目前是管理員，可查看全部回報並變更處理狀態。'
+    : '你目前為檢視模式：可查看全部回報，但只有管理員能變更處理狀態。';
+  permissionNote.classList.add(isAdmin ? 'admin-mode' : 'viewer-mode');
 
   function setStatus(text, type = '') {
     status.textContent = text;
@@ -28,6 +28,9 @@
 
   function setBusy(isBusy) {
     filter.disabled = isBusy;
+    dateInput.disabled = isBusy;
+    dateSearchButton.disabled = isBusy;
+    dateClearButton.disabled = isBusy;
     refreshButton.disabled = isBusy;
     refreshButton.textContent = isBusy ? '讀取中……' : '重新整理';
   }
@@ -84,11 +87,7 @@
       const reportStatus = document.createElement('span');
       const description = document.createElement('p');
       const meta = document.createElement('div');
-      const notification = document.createElement('span');
       const resolution = document.createElement('span');
-      const actions = document.createElement('div');
-      const actionButton = document.createElement('button');
-
       const reporter = profileMap.get(report.reporter_id);
       const resolver = profileMap.get(report.resolved_by);
 
@@ -103,26 +102,12 @@
         : 'status-badge success';
       description.className = 'admin-issue-description';
       meta.className = 'admin-issue-meta';
-      notification.className = report.notification_status === 'failed'
-        ? 'notification-state error'
-        : 'notification-state';
       resolution.className = 'resolution-detail';
-      actions.className = 'admin-issue-actions';
-      actionButton.className = report.status === 'open'
-        ? 'primary-button issue-status-button'
-        : 'secondary-button issue-status-button';
-      actionButton.type = 'button';
 
       reporterName.textContent = reporter?.display_name || '未知使用者';
       createdTime.textContent = `回報時間：${GymApp.formatDateTime(report.created_at)}`;
       reportStatus.textContent = report.status === 'open' ? '待處理' : '已解決';
       description.textContent = report.description;
-      notification.textContent = notificationLabel(report);
-
-      if (report.notification_status === 'failed' && report.notification_error) {
-        notification.title = report.notification_error;
-        notification.textContent += `：${report.notification_error}`;
-      }
 
       if (report.status === 'resolved' && report.resolved_at) {
         resolution.textContent =
@@ -132,38 +117,76 @@
         resolution.textContent = '尚未標記為已解決';
       }
 
-      actionButton.textContent = report.status === 'open'
-        ? '標記為已解決'
-        : '重新開啟';
-      actionButton.addEventListener('click', () => {
-        changeIssueStatus(report, actionButton);
-      });
-
       reporterBlock.append(reporterName, createdTime);
       header.append(reporterBlock, reportStatus);
-      meta.append(notification, resolution);
-      actions.append(actionButton);
-      row.append(header, description, meta, actions);
+      meta.appendChild(resolution);
+
+      if (isAdmin) {
+        const notification = document.createElement('span');
+        notification.className = report.notification_status === 'failed'
+          ? 'notification-state error'
+          : 'notification-state';
+        notification.textContent = notificationLabel(report);
+        if (report.notification_status === 'failed' && report.notification_error) {
+          notification.title = report.notification_error;
+          notification.textContent += `：${report.notification_error}`;
+        }
+        meta.prepend(notification);
+      }
+
+      row.append(header, description, meta);
+
+      if (isAdmin) {
+        const actions = document.createElement('div');
+        const actionButton = document.createElement('button');
+        actions.className = 'admin-issue-actions';
+        actionButton.className = report.status === 'open'
+          ? 'primary-button issue-status-button'
+          : 'secondary-button issue-status-button';
+        actionButton.type = 'button';
+        actionButton.textContent = report.status === 'open'
+          ? '標記為已解決'
+          : '重新開啟';
+        actionButton.addEventListener('click', () => {
+          changeIssueStatus(report, actionButton);
+        });
+        actions.appendChild(actionButton);
+        row.appendChild(actions);
+      }
+
       list.appendChild(row);
     }
   }
 
   async function loadReports({ keepMessage = false } = {}) {
+    const selectedDate = dateInput.value.trim();
+    const nextDate = selectedDate ? GymApp.nextDateString(selectedDate) : null;
+    if (selectedDate && !nextDate) {
+      setStatus('請選擇有效的回報日期。', 'error');
+      return;
+    }
+
     setBusy(true);
     setStatus('正在讀取問題回報……');
 
     try {
+      const columns = isAdmin
+        ? 'id, reporter_id, description, status, notification_status, ' +
+          'notified_at, notification_error, created_at, resolved_at, resolved_by'
+        : 'id, reporter_id, description, status, created_at, resolved_at, resolved_by';
       let query = app.client
         .from('issue_reports')
-        .select(
-          'id, reporter_id, description, status, notification_status, ' +
-          'notified_at, notification_error, created_at, resolved_at, resolved_by'
-        )
+        .select(columns)
         .order('created_at', { ascending: false })
         .limit(200);
 
       if (filter.value !== 'all') {
         query = query.eq('status', filter.value);
+      }
+      if (selectedDate) {
+        query = query
+          .gte('created_at', `${selectedDate}T00:00:00+08:00`)
+          .lt('created_at', `${nextDate}T00:00:00+08:00`);
       }
 
       const { data: reports, error } = await query;
@@ -176,10 +199,11 @@
       const profileMap = await GymApp.loadProfiles(profileIds);
 
       renderReports(reports || [], profileMap);
+      const rangeLabel = selectedDate ? `${selectedDate} ` : '';
       setStatus(
         reports?.length
-          ? `已讀取 ${reports.length} 筆問題回報。`
-          : '目前沒有符合條件的問題回報。',
+          ? `已讀取 ${rangeLabel}${reports.length} 筆問題回報。`
+          : `${rangeLabel}沒有符合條件的問題回報。`,
         reports?.length ? 'success' : ''
       );
 
@@ -189,7 +213,7 @@
       console.error('Issue reports loading failed', error);
       setStatus(`讀取失敗：${error.message}`, 'error');
       GymApp.setMessage(
-        '無法讀取管理資料，請確認帳號權限與資料庫 migration。',
+        '無法讀取問題回報，請確認新版資料庫 migration 已完成。',
         'error'
       );
     } finally {
@@ -197,6 +221,29 @@
     }
   }
 
+  async function loadAttendanceDates({ start, end }) {
+    return GymApp.loadAttendanceActiveDates(start, end);
+  }
+
+  datePicker = GymApp.createRecordDatePicker({
+    input: dateInput,
+    initialDate: null,
+    loadActiveDates: loadAttendanceDates,
+    onChange: null
+  });
+
+  dateSearchButton.addEventListener('click', () => {
+    if (!dateInput.value) {
+      setStatus('請先點擊日期欄位選擇回報日期。', 'error');
+      return;
+    }
+    loadReports();
+  });
+  dateClearButton.addEventListener('click', () => {
+    if (datePicker) datePicker.clear(false);
+    else dateInput.value = '';
+    loadReports();
+  });
   refreshButton.addEventListener('click', () => loadReports());
   filter.addEventListener('change', () => loadReports());
   await loadReports();

@@ -35,8 +35,7 @@
       key: 'admin',
       href: 'admin.html',
       icon: '⚙',
-      label: '問題回報管理',
-      adminOnly: true
+      label: '問題回報處理'
     }
   ];
 
@@ -117,7 +116,7 @@
         <div class="drawer-header">
           <div class="drawer-brand">
             <strong>功能選單</strong>
-            <span>v1.2 日曆標記與登入修正</span>
+            <span>v1.3 回報查詢與權限調整</span>
           </div>
           <button id="drawer-close-button" class="drawer-close-button"
             type="button" aria-label="關閉功能選單">×</button>
@@ -485,7 +484,7 @@
 
     if (typeof window.flatpickr !== 'function') {
       input.type = 'date';
-      input.value = initialDate;
+      if (initialDate) input.value = initialDate;
       return null;
     }
 
@@ -554,10 +553,9 @@
       }
     };
 
-    return window.flatpickr(input, {
+    const options = {
       allowInput: false,
       dateFormat: 'Y-m-d',
-      defaultDate: initialDate,
       disableMobile: true,
       locale,
       onReady: (_dates, _dateText, instance) => refreshMonth(instance),
@@ -572,7 +570,10 @@
         dayElement.classList.add('has-records');
         dayElement.title = `${dateText}（有紀錄）`;
       }
-    });
+    };
+
+    if (initialDate) options.defaultDate = initialDate;
+    return window.flatpickr(input, options);
   }
 
   function nextDateString(dateString) {

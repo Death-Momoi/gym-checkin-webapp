@@ -18,7 +18,7 @@ Supabase 作為驗證、PostgreSQL 資料庫與 Edge Functions 後端。
 - `foodwheel.html`：預設分類與自訂店家的美食轉盤
 - `history.html`：依日期查詢簽到紀錄
 - `report.html`：問題回報與 Gmail 通知
-- `admin.html`：管理員查看全部回報並更新處理狀態
+- `admin.html`：所有登入者查看並依日期篩選回報；僅管理員可更新處理狀態
 - `guide.html`：系統用途、簽到流程與功能使用說明
 - `privacy.html`：公開的隱私權政策與 Google API 資料使用說明
 - `terms.html`：公開的服務條款
@@ -37,8 +37,9 @@ Supabase 作為驗證、PostgreSQL 資料庫與 Edge Functions 後端。
 - `send-issue-email`：透過 Gmail API 寄送問題通知
 - `get-calendar-events`：讀取並篩選 Google Calendar 預約
 
-總覽圖表、預約月曆與簽到紀錄共用會標示「有紀錄日期」的
-日曆選擇器。`get-calendar-events` 同時支援單日預約與月份有效日期；
+總覽圖表、預約月曆、簽到紀錄與問題回報處理頁共用日期選擇器，
+藍點一律只標示「當天有人實際簽到」的日期，不因只有預約而顯示。
+`get-calendar-events` 同時支援單日預約與月份有效日期；
 前端呼叫 Edge Function 時會明確傳送使用者 access token，並在 401 後重新整理
 登入狀態再重試一次。
 
@@ -56,5 +57,5 @@ Supabase 作為驗證、PostgreSQL 資料庫與 Edge Functions 後端。
 
 ## 部署
 
-提交至 `main` 後，由 GitHub Pages 更新前端，Supabase GitHub Integration
-則同步資料庫 migrations 與 Edge Functions。
+提交至 `main` 後，由 GitHub Pages 更新前端，既有 GitHub Action 套用資料庫
+migrations。Edge Function 程式碼更新後，另於 Supabase Dashboard 部署。

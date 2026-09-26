@@ -92,17 +92,8 @@
     }
   }
 
-  async function loadActiveDates({ month }) {
-    const { data, error } = await GymApp.invokeUserFunction(
-      'get-calendar-events',
-      { mode: 'active_dates', month }
-    );
-
-    if (error) throw error;
-    if (!data?.ok || !Array.isArray(data.active_dates)) {
-      throw new Error(data?.error || 'Calendar Function 回傳格式不正確');
-    }
-    return data.active_dates;
+  async function loadActiveDates({ start, end }) {
+    return GymApp.loadAttendanceActiveDates(start, end);
   }
 
   const initialDate = GymApp.taipeiDateString();
