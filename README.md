@@ -32,6 +32,7 @@ Supabase 作為驗證、PostgreSQL 資料庫與 Edge Functions 後端。
 
 - Supabase Auth：Google OAuth 登入
 - Supabase PostgreSQL：個人資料、簽到紀錄與問題回報
+- 首次登入姓名綁定：每個 Google 帳號確認一次姓名後寫入 `profiles`
 - Row Level Security：限制匿名存取並依登入身分控管資料
 - `admin_set_issue_status`：僅限 active 管理員解決或重新開啟問題
 - `send-issue-email`：透過 Gmail API 寄送問題通知
