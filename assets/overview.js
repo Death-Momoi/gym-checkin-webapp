@@ -21,6 +21,7 @@
   const dialogCloseButton = document.getElementById('overview-dialog-close-button');
 
   let requestSequence = 0;
+  let datePicker = null;
 
   const STATUS_META = Object.freeze({
     completed: { label: '已簽退', className: 'status-completed' },
@@ -397,9 +398,9 @@
         .order('checked_in_at', { ascending: true })
         .limit(500);
 
-      const calendarRequest = app.client.functions.invoke(
+      const calendarRequest = GymApp.invokeUserFunction(
         'get-calendar-events',
-        { body: { date: selectedDate } }
+        { date: selectedDate }
       );
 
       const [attendanceResult, calendarSettled] = await Promise.all([
@@ -471,25 +472,65 @@
     }
   }
 
+  async function loadCalendarActiveDates({ month }) {
+    const { data, error } = await GymApp.invokeUserFunction(
+      'get-calendar-events',
+      { mode: 'active_dates', month }
+    );
+    if (error) throw error;
+    if (!data?.ok || !Array.isArray(data.active_dates)) {
+      throw new Error(data?.error || 'Calendar Function 回傳格式不正確');
+    }
+    return data.active_dates;
+  }
+
+  async function loadOverviewActiveDates(range) {
+    const results = await Promise.allSettled([
+      GymApp.loadAttendanceActiveDates(range.start, range.end),
+      loadCalendarActiveDates(range)
+    ]);
+    const dates = new Set();
+    results.forEach(result => {
+      if (result.status === 'fulfilled') {
+        result.value.forEach(date => dates.add(date));
+      }
+    });
+
+    if (results.every(result => result.status === 'rejected')) {
+      throw results[0].reason;
+    }
+    return [...dates];
+  }
+
   function changeDate(direction) {
     const changedDate = direction < 0
       ? previousDateString(dateInput.value)
       : GymApp.nextDateString(dateInput.value);
     if (!changedDate) return;
-    dateInput.value = changedDate;
+    if (datePicker) datePicker.setDate(changedDate, false);
+    else dateInput.value = changedDate;
     loadOverview();
   }
 
   previousButton.addEventListener('click', () => changeDate(-1));
   nextButton.addEventListener('click', () => changeDate(1));
   refreshButton.addEventListener('click', loadOverview);
-  dateInput.addEventListener('change', loadOverview);
   dialogCloseIcon.addEventListener('click', closeDetails);
   dialogCloseButton.addEventListener('click', closeDetails);
   dialog.addEventListener('click', event => {
     if (event.target === dialog) closeDetails();
   });
 
-  dateInput.value = GymApp.taipeiDateString();
+  const initialDate = GymApp.taipeiDateString();
+  datePicker = GymApp.createRecordDatePicker({
+    input: dateInput,
+    initialDate,
+    loadActiveDates: loadOverviewActiveDates,
+    onChange: loadOverview
+  });
+  if (!datePicker) {
+    dateInput.value = initialDate;
+    dateInput.addEventListener('change', loadOverview);
+  }
   await loadOverview();
 })();

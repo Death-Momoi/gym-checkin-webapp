@@ -44,6 +44,7 @@
   let currentSession = null;
   let currentProfile = null;
   let authSubscription = null;
+  let sessionRefreshPromise = null;
 
   function pageFileName() {
     const name = window.location.pathname.split('/').pop();
@@ -116,7 +117,7 @@
         <div class="drawer-header">
           <div class="drawer-brand">
             <strong>功能選單</strong>
-            <span>v1.1 借用狀態總覽</span>
+            <span>v1.2 日曆標記與登入修正</span>
           </div>
           <button id="drawer-close-button" class="drawer-close-button"
             type="button" aria-label="關閉功能選單">×</button>
@@ -356,6 +357,77 @@
     };
   }
 
+  async function refreshCurrentSession() {
+    if (!sessionRefreshPromise) {
+      sessionRefreshPromise = (async () => {
+        const { data, error } = await client.auth.refreshSession();
+        if (error) throw error;
+        if (!data.session?.access_token) {
+          throw new Error('登入狀態已失效，請登出後重新登入');
+        }
+        currentSession = data.session;
+        updateAuthShell(currentSession, currentProfile);
+        return currentSession;
+      })().finally(() => {
+        sessionRefreshPromise = null;
+      });
+    }
+
+    return sessionRefreshPromise;
+  }
+
+  async function currentAccessToken(forceRefresh = false) {
+    if (!client) throw new Error('Supabase 尚未初始化');
+
+    if (forceRefresh) {
+      const refreshedSession = await refreshCurrentSession();
+      return refreshedSession.access_token;
+    }
+
+    const { data, error } = await client.auth.getSession();
+    if (error) throw error;
+    if (!data.session?.access_token) {
+      throw new Error('請先使用 Google 帳號登入');
+    }
+
+    currentSession = data.session;
+    const expiresAtMs = Number(currentSession.expires_at || 0) * 1000;
+    if (expiresAtMs && expiresAtMs <= Date.now() + 60_000) {
+      const refreshedSession = await refreshCurrentSession();
+      return refreshedSession.access_token;
+    }
+
+    return currentSession.access_token;
+  }
+
+  function isUnauthorizedFunctionResult(result) {
+    const responseStatus = Number(result?.error?.context?.status || 0);
+    const errorText = [
+      result?.error?.message,
+      result?.data?.error
+    ].filter(Boolean).join(' ');
+    return responseStatus === 401 ||
+      /\b401\b|JWT|\u767b\u5165\u72c0\u614b\u7121\u6548|\u8acb\u5148\u767b\u5165/i.test(errorText);
+  }
+
+  async function invokeUserFunction(functionName, body) {
+    let accessToken = await currentAccessToken(false);
+    let result = await client.functions.invoke(functionName, {
+      body,
+      headers: { Authorization: `Bearer ${accessToken}` }
+    });
+
+    if (isUnauthorizedFunctionResult(result)) {
+      accessToken = await currentAccessToken(true);
+      result = await client.functions.invoke(functionName, {
+        body,
+        headers: { Authorization: `Bearer ${accessToken}` }
+      });
+    }
+
+    return result;
+  }
+
   function formatTime(value) {
     return new Intl.DateTimeFormat('zh-TW', {
       timeZone: 'Asia/Taipei',
@@ -386,6 +458,121 @@
     }).formatToParts(value);
     const partMap = Object.fromEntries(parts.map(part => [part.type, part.value]));
     return `${partMap.year}-${partMap.month}-${partMap.day}`;
+  }
+
+  async function loadAttendanceActiveDates(startDate, endDate) {
+    const { data, error } = await client
+      .from('attendance_sessions')
+      .select('checked_in_at')
+      .gte('checked_in_at', `${startDate}T00:00:00+08:00`)
+      .lt('checked_in_at', `${endDate}T00:00:00+08:00`)
+      .order('checked_in_at', { ascending: true })
+      .limit(5000);
+
+    if (error) throw error;
+    return [...new Set(
+      (data || []).map(record => taipeiDateString(new Date(record.checked_in_at)))
+    )];
+  }
+
+  function createRecordDatePicker({
+    input,
+    initialDate,
+    loadActiveDates,
+    onChange
+  }) {
+    if (!input) return null;
+
+    if (typeof window.flatpickr !== 'function') {
+      input.type = 'date';
+      input.value = initialDate;
+      return null;
+    }
+
+    const monthCache = new Map();
+    let activeDates = new Set();
+    let loadSequence = 0;
+
+    function localDateString(date) {
+      return [
+        date.getFullYear(),
+        String(date.getMonth() + 1).padStart(2, '0'),
+        String(date.getDate()).padStart(2, '0')
+      ].join('-');
+    }
+
+    function monthRange(year, monthIndex) {
+      const start = new Date(Date.UTC(year, monthIndex, 1))
+        .toISOString()
+        .slice(0, 10);
+      const end = new Date(Date.UTC(year, monthIndex + 1, 1))
+        .toISOString()
+        .slice(0, 10);
+      return { start, end, month: start.slice(0, 7) };
+    }
+
+    async function refreshMonth(instance) {
+      const range = monthRange(instance.currentYear, instance.currentMonth);
+      const currentLoad = ++loadSequence;
+
+      try {
+        let dates = monthCache.get(range.month);
+        if (!dates) {
+          dates = await loadActiveDates(range);
+          dates = Array.isArray(dates) ? dates : [];
+          monthCache.set(range.month, dates);
+        }
+        if (currentLoad !== loadSequence) return;
+        activeDates = new Set(dates);
+        instance.redraw();
+      } catch (error) {
+        if (currentLoad !== loadSequence) return;
+        activeDates = new Set();
+        console.warn('Active date markers could not be loaded', error);
+        instance.redraw();
+      }
+    }
+
+    const locale = {
+      firstDayOfWeek: 1,
+      weekdays: {
+        shorthand: ['日', '一', '二', '三', '四', '五', '六'],
+        longhand: [
+          '星期日', '星期一', '星期二', '星期三',
+          '星期四', '星期五', '星期六'
+        ]
+      },
+      months: {
+        shorthand: [
+          '1月', '2月', '3月', '4月', '5月', '6月',
+          '7月', '8月', '9月', '10月', '11月', '12月'
+        ],
+        longhand: [
+          '1月', '2月', '3月', '4月', '5月', '6月',
+          '7月', '8月', '9月', '10月', '11月', '12月'
+        ]
+      }
+    };
+
+    return window.flatpickr(input, {
+      allowInput: false,
+      dateFormat: 'Y-m-d',
+      defaultDate: initialDate,
+      disableMobile: true,
+      locale,
+      onReady: (_dates, _dateText, instance) => refreshMonth(instance),
+      onMonthChange: (_dates, _dateText, instance) => refreshMonth(instance),
+      onYearChange: (_dates, _dateText, instance) => refreshMonth(instance),
+      onChange: (_dates, dateText) => {
+        if (dateText && typeof onChange === 'function') onChange(dateText);
+      },
+      onDayCreate: (_dates, _dateText, _instance, dayElement) => {
+        const dateText = localDateString(dayElement.dateObj);
+        if (!activeDates.has(dateText)) return;
+        dayElement.classList.add('has-records');
+        dayElement.title = `${dateText}（有紀錄）`;
+      }
+    });
   }
 
   function nextDateString(dateString) {
@@ -465,6 +652,8 @@
     functionErrorMessage,
     hideMessage,
     init,
+    invokeUserFunction,
+    loadAttendanceActiveDates,
     loadOpenPeople,
     loadProfiles,
     nextDateString,
@@ -474,6 +663,7 @@
     setMessage,
     signInWithGoogle,
     signOut,
-    taipeiDateString
+    taipeiDateString,
+    createRecordDatePicker
   };
 })();

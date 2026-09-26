@@ -4,8 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>總覽圖表｜運動科學實驗室簽到系統</title>
+  <link rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.css">
   <link rel="stylesheet" href="./assets/styles.css">
   <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.js"></script>
   <script defer src="./assets/common.js"></script>
   <script defer src="./assets/overview.js"></script>
 </head>
@@ -23,13 +26,18 @@
       <div class="overview-date-controls">
         <button id="overview-previous-button" class="secondary-button" type="button"
           aria-label="前一天">‹ 前一天</button>
-        <input id="overview-date" type="date">
+        <input id="overview-date" type="text" placeholder="YYYY-MM-DD"
+          autocomplete="off" inputmode="none">
         <button id="overview-next-button" class="secondary-button" type="button"
           aria-label="後一天">後一天 ›</button>
         <button id="overview-refresh-button" class="primary-button" type="button">
           重新讀取
         </button>
       </div>
+      <p class="date-marker-hint">
+        <span class="date-marker-dot" aria-hidden="true"></span>
+        日曆上的藍點代表當天有簽到紀錄或預約。
+      </p>
       <p id="overview-status" class="section-status" aria-live="polite"></p>
     </section>
 

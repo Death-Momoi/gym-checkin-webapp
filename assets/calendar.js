@@ -8,6 +8,7 @@
   const refreshButton = document.getElementById('calendar-refresh-button');
   const status = document.getElementById('calendar-status');
   const list = document.getElementById('calendar-list');
+  let datePicker = null;
 
   function setStatus(text, type = '') {
     status.textContent = text;
@@ -61,9 +62,9 @@
     setStatus('正在讀取 Google Calendar……');
 
     try {
-      const { data, error } = await app.client.functions.invoke(
+      const { data, error } = await GymApp.invokeUserFunction(
         'get-calendar-events',
-        { body: { date: selectedDate } }
+        { date: selectedDate }
       );
 
       if (error) throw error;
@@ -91,8 +92,30 @@
     }
   }
 
-  dateInput.value = GymApp.taipeiDateString();
+  async function loadActiveDates({ month }) {
+    const { data, error } = await GymApp.invokeUserFunction(
+      'get-calendar-events',
+      { mode: 'active_dates', month }
+    );
+
+    if (error) throw error;
+    if (!data?.ok || !Array.isArray(data.active_dates)) {
+      throw new Error(data?.error || 'Calendar Function 回傳格式不正確');
+    }
+    return data.active_dates;
+  }
+
+  const initialDate = GymApp.taipeiDateString();
+  datePicker = GymApp.createRecordDatePicker({
+    input: dateInput,
+    initialDate,
+    loadActiveDates,
+    onChange: loadEvents
+  });
+  if (!datePicker) {
+    dateInput.value = initialDate;
+    dateInput.addEventListener('change', loadEvents);
+  }
   refreshButton.addEventListener('click', loadEvents);
-  dateInput.addEventListener('change', loadEvents);
   await loadEvents();
 })();

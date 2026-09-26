@@ -54,10 +54,18 @@
     issueCount.textContent = '0';
     GymApp.setMessage('問題回報已儲存，正在寄送 Gmail 通知……');
 
-    const { data: emailResult, error: emailError } =
-      await app.client.functions.invoke('send-issue-email', {
-        body: { report_id: createdReport.id }
-      });
+    let emailResult = null;
+    let emailError = null;
+    try {
+      const emailResponse = await GymApp.invokeUserFunction(
+        'send-issue-email',
+        { report_id: createdReport.id }
+      );
+      emailResult = emailResponse.data;
+      emailError = emailResponse.error;
+    } catch (error) {
+      emailError = error;
+    }
 
     if (emailError || !emailResult?.ok) {
       console.error('Gmail notification failed', emailError, emailResult);

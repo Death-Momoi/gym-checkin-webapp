@@ -63,10 +63,28 @@ function parseDate(value) {
   return { value, year, month, day };
 }
 
+function parseMonth(value) {
+  if (typeof value !== "string" || !/^\d{4}-\d{2}$/.test(value)) {
+    return null;
+  }
+
+  const [year, month] = value.split("-").map(Number);
+  if (year < 2000 || year > 2100 || month < 1 || month > 12) {
+    return null;
+  }
+  return { value, year, month };
+}
+
 function nextDateString({ year, month, day }) {
   return new Date(Date.UTC(year, month - 1, day + 1))
     .toISOString()
     .slice(0, 10);
+}
+
+function nextMonthString({ year, month }) {
+  return new Date(Date.UTC(year, month, 1))
+    .toISOString()
+    .slice(0, 7);
 }
 
 function minuteLabel(minutes) {
@@ -154,10 +172,7 @@ async function getGoogleAccessToken() {
   return payload.access_token;
 }
 
-async function getCalendarEvents(date, accessToken) {
-  const nextDate = nextDateString(date);
-  const timeMin = `${date.value}T00:00:00+08:00`;
-  const timeMax = `${nextDate}T00:00:00+08:00`;
+async function getGoogleCalendarEvents(timeMin, timeMax, accessToken) {
   const calendarId = requiredEnv("GOOGLE_CALENDAR_ID");
   const allEvents = [];
   let pageToken = "";
@@ -208,11 +223,19 @@ async function getCalendarEvents(date, accessToken) {
       : "";
   } while (pageToken);
 
+  return allEvents
+    .filter((event) => event?.status !== "cancelled");
+}
+
+async function getCalendarEvents(date, accessToken) {
+  const nextDate = nextDateString(date);
+  const timeMin = `${date.value}T00:00:00+08:00`;
+  const timeMax = `${nextDate}T00:00:00+08:00`;
   const dayStartMs = Date.parse(timeMin);
   const dayEndMs = Date.parse(timeMax);
+  const events = await getGoogleCalendarEvents(timeMin, timeMax, accessToken);
 
-  return allEvents
-    .filter((event) => event?.status !== "cancelled")
+  return events
     .map((event) => eventToPublicRecord(event, dayStartMs, dayEndMs))
     .filter(Boolean)
     .sort((left, right) =>
@@ -220,6 +243,52 @@ async function getCalendarEvents(date, accessToken) {
       left.end_minute - right.end_minute ||
       left.title.localeCompare(right.title, "zh-Hant")
     );
+}
+
+function eventTimeBounds(event) {
+  const isAllDay = typeof event?.start?.date === "string";
+  const startValue = isAllDay ? event?.start?.date : event?.start?.dateTime;
+  const endValue = isAllDay ? event?.end?.date : event?.end?.dateTime;
+  if (typeof startValue !== "string" || typeof endValue !== "string") {
+    return null;
+  }
+
+  const startMs = Date.parse(
+    isAllDay ? `${startValue}T00:00:00+08:00` : startValue,
+  );
+  const endMs = Date.parse(
+    isAllDay ? `${endValue}T00:00:00+08:00` : endValue,
+  );
+  if (!Number.isFinite(startMs) || !Number.isFinite(endMs) || endMs <= startMs) {
+    return null;
+  }
+  return { startMs, endMs };
+}
+
+async function getCalendarActiveDates(month, accessToken) {
+  const nextMonth = nextMonthString(month);
+  const timeMin = `${month.value}-01T00:00:00+08:00`;
+  const timeMax = `${nextMonth}-01T00:00:00+08:00`;
+  const events = await getGoogleCalendarEvents(timeMin, timeMax, accessToken);
+  const eventBounds = events.map(eventTimeBounds).filter(Boolean);
+  const activeDates = [];
+  const daysInMonth = new Date(Date.UTC(month.year, month.month, 0)).getUTCDate();
+
+  for (let day = 1; day <= daysInMonth; day += 1) {
+    const dateValue = [
+      String(month.year).padStart(4, "0"),
+      String(month.month).padStart(2, "0"),
+      String(day).padStart(2, "0"),
+    ].join("-");
+    const dayStartMs = Date.parse(`${dateValue}T00:00:00+08:00`);
+    const dayEndMs = dayStartMs + 86_400_000;
+    const hasEvent = eventBounds.some((bounds) =>
+      bounds.startMs < dayEndMs && bounds.endMs > dayStartMs
+    );
+    if (hasEvent) activeDates.push(dateValue);
+  }
+
+  return activeDates;
 }
 
 Deno.serve(async (request) => {
@@ -245,9 +314,16 @@ Deno.serve(async (request) => {
     return jsonResponse({ error: "請求內容不是有效的 JSON" }, 400);
   }
 
-  const date = parseDate(requestBody?.date);
-  if (!date) {
+  const mode = requestBody?.mode === "active_dates"
+    ? "active_dates"
+    : "events";
+  const date = mode === "events" ? parseDate(requestBody?.date) : null;
+  const month = mode === "active_dates" ? parseMonth(requestBody?.month) : null;
+  if (mode === "events" && !date) {
     return jsonResponse({ error: "日期格式必須是 YYYY-MM-DD" }, 400);
+  }
+  if (mode === "active_dates" && !month) {
+    return jsonResponse({ error: "月份格式必須是 YYYY-MM" }, 400);
   }
 
   try {
@@ -274,6 +350,18 @@ Deno.serve(async (request) => {
     }
 
     const accessToken = await getGoogleAccessToken();
+    if (mode === "active_dates") {
+      if (!month) return jsonResponse({ error: "無效的月份" }, 400);
+      const activeDates = await getCalendarActiveDates(month, accessToken);
+      return jsonResponse({
+        ok: true,
+        month: month.value,
+        time_zone: TAIPEI_TIME_ZONE,
+        active_dates: activeDates,
+      });
+    }
+
+    if (!date) return jsonResponse({ error: "無效的日期" }, 400);
     const events = await getCalendarEvents(date, accessToken);
 
     return jsonResponse({

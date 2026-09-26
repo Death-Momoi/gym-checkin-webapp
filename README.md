@@ -37,6 +37,11 @@ Supabase 作為驗證、PostgreSQL 資料庫與 Edge Functions 後端。
 - `send-issue-email`：透過 Gmail API 寄送問題通知
 - `get-calendar-events`：讀取並篩選 Google Calendar 預約
 
+總覽圖表、預約月曆與簽到紀錄共用會標示「有紀錄日期」的
+日曆選擇器。`get-calendar-events` 同時支援單日預約與月份有效日期；
+前端呼叫 Edge Function 時會明確傳送使用者 access token，並在 401 後重新整理
+登入狀態再重試一次。
+
 ## Edge Function Secrets
 
 實際值只設定於 Supabase，不可提交至 GitHub：

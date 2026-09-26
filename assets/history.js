@@ -8,6 +8,7 @@
   const refreshButton = document.getElementById('history-refresh-button');
   const status = document.getElementById('history-status');
   const list = document.getElementById('history-list');
+  let datePicker = null;
 
   function setStatus(text, type = '') {
     status.textContent = text;
@@ -126,8 +127,21 @@
     }
   }
 
-  dateInput.value = GymApp.taipeiDateString();
+  async function loadActiveDates({ start, end }) {
+    return GymApp.loadAttendanceActiveDates(start, end);
+  }
+
+  const initialDate = GymApp.taipeiDateString();
+  datePicker = GymApp.createRecordDatePicker({
+    input: dateInput,
+    initialDate,
+    loadActiveDates,
+    onChange: loadHistory
+  });
+  if (!datePicker) {
+    dateInput.value = initialDate;
+    dateInput.addEventListener('change', loadHistory);
+  }
   refreshButton.addEventListener('click', loadHistory);
-  dateInput.addEventListener('change', loadHistory);
   await loadHistory();
 })();
