@@ -26,6 +26,24 @@ function requiredEnv(name: string) {
   return value;
 }
 
+function readNamedSupabaseKey(name: string, legacyName: string) {
+  const rawValue = Deno.env.get(name)?.trim();
+
+  if (rawValue) {
+    try {
+      const parsed = JSON.parse(rawValue);
+      if (typeof parsed.default === "string" && parsed.default) {
+        return parsed.default;
+      }
+    } catch {
+      // Some projects expose one key directly instead of a named-key object.
+      return rawValue;
+    }
+  }
+
+  return requiredEnv(legacyName);
+}
+
 function bytesToHex(bytes: Uint8Array) {
   return Array.from(bytes, (byte) => byte.toString(16).padStart(2, "0")).join("");
 }
@@ -88,7 +106,7 @@ Deno.serve(async (request) => {
 
     const supabase = createClient(
       requiredEnv("SUPABASE_URL"),
-      requiredEnv("SUPABASE_SERVICE_ROLE_KEY"),
+      readNamedSupabaseKey("SUPABASE_SECRET_KEYS", "SUPABASE_SERVICE_ROLE_KEY"),
       { auth: { persistSession: false, autoRefreshToken: false } },
     );
 
@@ -98,9 +116,17 @@ Deno.serve(async (request) => {
       .eq("device_code", deviceCode)
       .maybeSingle();
 
+    if (deviceError) {
+      console.error("presence device lookup failed", {
+        code: deviceError.code,
+        message: deviceError.message,
+        details: deviceError.details,
+      });
+      return jsonResponse({ ok: false, error: "無法讀取現場裝置資料" }, 500);
+    }
+
     const suppliedSecretHash = await sha256Hex(deviceSecret);
     if (
-      deviceError ||
       !device ||
       !device.enabled ||
       !constantTimeEqual(suppliedSecretHash, device.secret_hash)
@@ -152,4 +178,3 @@ Deno.serve(async (request) => {
     }, 500);
   }
 });
-
