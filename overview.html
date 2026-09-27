@@ -45,7 +45,7 @@
       <div class="overview-chart-heading">
         <div>
           <h2>當日借用狀態</h2>
-          <p class="hint">手機可在圖表上左右滑動；點選任一長條可查看詳細資訊。</p>
+          <p class="hint">姓名右側色塊的位置與長度代表使用時段；點選色塊可查看詳細資訊。</p>
         </div>
       </div>
 
@@ -64,18 +64,13 @@
       <div id="overview-timeline-scroll" class="timeline-scroll" tabindex="0"
         aria-label="當日借用與預約時間軸">
         <div id="overview-timeline-board" class="timeline-board">
-          <div class="timeline-axis-row">
+          <div id="overview-usage-rows"></div>
+          <div id="overview-reservation-rows" class="timeline-reservation-group"></div>
+
+          <div class="timeline-axis-row" aria-hidden="true">
             <div class="timeline-sticky-label timeline-axis-label">時間</div>
             <div id="overview-time-axis" class="timeline-axis-track"></div>
           </div>
-
-          <div class="timeline-section-title">簽到人員使用時間</div>
-          <div id="overview-usage-rows"></div>
-
-          <div class="timeline-section-title reservation-title">
-            Google Calendar 預約時間
-          </div>
-          <div id="overview-reservation-rows"></div>
         </div>
       </div>
     </section>

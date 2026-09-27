@@ -268,7 +268,7 @@
     ]);
   }
 
-  function createBar(record, selectedDate) {
+  function createBar(record) {
     const button = document.createElement('button');
     const meta = STATUS_META[record.status];
     const leftPercent = (record.start / 1440) * 100;
@@ -277,10 +277,7 @@
     button.className = `timeline-bar ${meta.className}`;
     button.style.left = `${leftPercent}%`;
     button.style.width = `${widthPercent}%`;
-    button.style.top = `${8 + record.lane * 34}px`;
-    button.textContent = record.kind === 'reservation'
-      ? record.name
-      : `${record.startLabel}–${minutesToLabel(record.end)}`;
+    button.style.top = `${9 + record.lane * 31}px`;
     button.title = `${record.name}｜${record.startLabel}–${record.endLabel}｜${meta.label}`;
     button.setAttribute('aria-label', button.title);
     button.addEventListener('click', () => {
@@ -302,9 +299,9 @@
     track.className = 'timeline-track';
     stickyLabel.textContent = label;
     stickyLabel.title = label;
-    track.style.height = `${Math.max(50, 16 + laneCount * 34)}px`;
+    track.style.height = `${Math.max(48, 18 + laneCount * 31)}px`;
     appendNowMarker(track, selectedDate);
-    recordsWithLanes.forEach(record => track.appendChild(createBar(record, selectedDate)));
+    recordsWithLanes.forEach(record => track.appendChild(createBar(record)));
     row.append(stickyLabel, track);
     return row;
   }
@@ -315,6 +312,8 @@
       const label = document.createElement('span');
       label.textContent = minutesToLabel(minute);
       label.style.left = `${(minute / 1440) * 100}%`;
+      label.className = 'timeline-axis-tick';
+      if (minute % 360 === 0) label.classList.add('timeline-axis-major');
       if (minute === 0) label.classList.add('first');
       if (minute === 1440) label.classList.add('last');
       timeAxis.appendChild(label);

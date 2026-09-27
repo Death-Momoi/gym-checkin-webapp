@@ -1539,12 +1539,10 @@ span.flatpickr-weekday {
 
 .timeline-scroll {
   width: 100%;
-  overflow-x: auto;
-  overscroll-behavior-inline: contain;
+  overflow: hidden;
   background: #030712;
   border: 1px solid #334155;
   border-radius: 14px;
-  scrollbar-color: #475569 #0f172a;
 }
 
 .timeline-scroll:focus-visible {
@@ -1553,34 +1551,34 @@ span.flatpickr-weekday {
 }
 
 .timeline-board {
-  min-width: 820px;
-  padding: 10px 12px 14px 0;
+  --timeline-label-width: 120px;
+  width: 100%;
+  min-width: 0;
+  padding: 12px;
 }
 
 .timeline-axis-row,
 .timeline-row {
   display: grid;
-  grid-template-columns: 120px minmax(680px, 1fr);
+  grid-template-columns: var(--timeline-label-width) minmax(0, 1fr);
   align-items: stretch;
 }
 
 .timeline-sticky-label {
-  position: sticky;
+  position: relative;
   z-index: 5;
-  left: 0;
   display: flex;
-  padding: 0 10px;
+  padding: 0 12px 0 4px;
   align-items: center;
   color: #e2e8f0;
   background: #030712;
-  border-right: 1px solid #334155;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .timeline-axis-label {
-  justify-content: center;
+  justify-content: flex-start;
   color: #94a3b8;
   font-size: 0.76rem;
   font-weight: 750;
@@ -1589,22 +1587,15 @@ span.flatpickr-weekday {
 .timeline-axis-track,
 .timeline-track {
   position: relative;
-  background-image: linear-gradient(
-    to right,
-    rgba(71, 85, 105, 0.52) 1px,
-    transparent 1px
-  );
-  background-size: 8.333333% 100%;
 }
 
 .timeline-axis-track {
-  height: 42px;
-  border-bottom: 1px solid #475569;
+  height: 36px;
 }
 
 .timeline-axis-track > span:not(.timeline-now-marker) {
   position: absolute;
-  bottom: 9px;
+  top: 10px;
   color: #94a3b8;
   font-size: 0.7rem;
   font-weight: 700;
@@ -1619,22 +1610,16 @@ span.flatpickr-weekday {
   transform: translateX(-100%);
 }
 
-.timeline-section-title {
-  padding: 12px 14px 7px 124px;
-  color: #67e8f9;
-  font-size: 0.82rem;
-  font-weight: 800;
-  letter-spacing: 0.04em;
+.timeline-row {
+  border-bottom: 1px solid rgba(51, 65, 85, 0.62);
 }
 
-.timeline-section-title.reservation-title {
-  margin-top: 8px;
-  color: #c4b5fd;
+.timeline-reservation-group {
   border-top: 1px solid #334155;
 }
 
-.timeline-row {
-  border-bottom: 1px solid rgba(51, 65, 85, 0.62);
+.timeline-reservation-group .timeline-row:last-child {
+  border-bottom: 0;
 }
 
 .timeline-person-label {
@@ -1643,29 +1628,33 @@ span.flatpickr-weekday {
 }
 
 .timeline-track {
-  min-height: 50px;
+  min-width: 0;
+  min-height: 48px;
 }
 
 .timeline-bar {
   position: absolute;
   z-index: 2;
   display: block;
-  min-width: 8px;
-  min-height: 26px;
-  height: 26px;
+  min-width: 5px;
+  min-height: 24px;
+  height: 24px;
   margin: 0;
-  padding: 4px 8px;
-  color: #fff;
-  font-size: 0.69rem;
-  font-weight: 800;
-  line-height: 18px;
-  text-align: left;
+  padding: 0;
   border: 1px solid rgba(255, 255, 255, 0.35);
-  border-radius: 7px;
+  border-radius: 6px;
   box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  overflow: visible;
+}
+
+.timeline-bar::before {
+  position: absolute;
+  top: -8px;
+  bottom: -8px;
+  left: 50%;
+  width: max(100%, 18px);
+  content: '';
+  transform: translateX(-50%);
 }
 
 .timeline-bar:hover:not(:disabled) {
@@ -1673,6 +1662,12 @@ span.flatpickr-weekday {
   filter: brightness(1.18);
   outline: 2px solid rgba(255, 255, 255, 0.48);
   transform: none;
+}
+
+.timeline-bar:focus-visible {
+  z-index: 4;
+  outline: 3px solid #f8fafc;
+  outline-offset: 2px;
 }
 
 .timeline-bar.status-completed {
@@ -1721,7 +1716,7 @@ span.flatpickr-weekday {
 
 .timeline-section-empty {
   margin: 0;
-  padding: 14px 16px 14px 124px;
+  padding: 14px;
   color: #64748b;
   font-size: 0.78rem;
   border-bottom: 1px solid rgba(51, 65, 85, 0.62);
@@ -2013,18 +2008,35 @@ span.flatpickr-weekday {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .overview-chart-card {
+    padding: 16px 12px;
+  }
+
+  .timeline-legend {
+    gap: 8px 12px;
+  }
+
   .timeline-board {
-    min-width: 760px;
+    --timeline-label-width: clamp(76px, 25vw, 94px);
+    min-width: 0;
+    padding: 10px 8px 8px;
   }
 
-  .timeline-axis-row,
-  .timeline-row {
-    grid-template-columns: 105px minmax(640px, 1fr);
+  .timeline-sticky-label {
+    padding-right: 8px;
+    font-size: 0.76rem;
   }
 
-  .timeline-section-title,
-  .timeline-section-empty {
-    padding-left: 110px;
+  .timeline-axis-track > .timeline-axis-tick:not(.timeline-axis-major) {
+    display: none;
+  }
+
+  .timeline-axis-track > span:not(.timeline-now-marker) {
+    font-size: 0.64rem;
+  }
+
+  .timeline-bar {
+    min-width: 4px;
   }
 
   .timeline-detail-list > div {
