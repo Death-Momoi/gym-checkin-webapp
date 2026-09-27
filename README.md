@@ -32,11 +32,13 @@ Supabase 作為驗證、PostgreSQL 資料庫與 Edge Functions 後端。
 
 - Supabase Auth：Google OAuth 登入
 - Supabase PostgreSQL：個人資料、簽到紀錄與問題回報
+- 現場 QR 驗證：由可信任裝置簽發 60 秒短效 Token，簽到時由資料庫驗證
 - 首次登入姓名綁定：每個 Google 帳號確認一次姓名後寫入 `profiles`
 - Row Level Security：限制匿名存取並依登入身分控管資料
 - `admin_set_issue_status`：僅限 active 管理員解決或重新開啟問題
 - `send-issue-email`：透過 Gmail API 寄送問題通知
 - `get-calendar-events`：讀取並篩選 Google Calendar 預約
+- `issue-presence-token`：驗證現場裝置並簽發可供多人於 60 秒內掃描的 QR Token
 
 總覽圖表、預約月曆、簽到紀錄與問題回報處理頁共用日期選擇器，
 藍點一律只標示「當天有人實際簽到」的日期，不因只有預約而顯示。
@@ -55,6 +57,20 @@ Supabase 作為驗證、PostgreSQL 資料庫與 Edge Functions 後端。
 - `GOOGLE_CALENDAR_ID`
 - `GMAIL_SENDER_EMAIL`
 - `ISSUE_NOTIFICATION_TO`
+- `CHECKIN_APP_URL`（值為 `https://death-momoi.github.io/gym-checkin-webapp/`）
+
+`SUPABASE_URL` 與 `SUPABASE_SERVICE_ROLE_KEY` 由 Supabase Edge Functions
+執行環境提供，不可放進前端或 PC 程式。
+
+## 現場 QR 簽到
+
+- 沒有有效現場 Token 時，網頁仍可登入、檢視資料與簽退，但不能簽到。
+- QR 過期後仍會開啟網站，頁面會明確顯示已過期並停用簽到按鈕。
+- 簽退不需要 Token；已簽到者從含 Token 的 QR 連結進入也能正常簽退。
+- 同一 Token 在 60 秒有效期內可由多人使用，不會因第一人簽到而失效。
+- `pc_qr_generator/` 提供 240 × 240 電腦測試畫面，日後 ESP32 可沿用同一 API。
+
+完整部署順序請見 `DEPLOY_PRESENCE_QR.md`。
 
 ## 部署
 

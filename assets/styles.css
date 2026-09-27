@@ -1870,6 +1870,75 @@ span.flatpickr-weekday {
   line-height: 1.45;
 }
 
+.presence-card {
+  border-color: #475569;
+  transition: border-color 160ms ease, background-color 160ms ease;
+}
+
+.presence-card-heading {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr);
+  align-items: center;
+  gap: 14px;
+}
+
+.presence-card-heading h2,
+.presence-card-heading p {
+  margin: 0;
+}
+
+.presence-card-heading p {
+  margin-top: 5px;
+  color: #cbd5e1;
+  line-height: 1.55;
+}
+
+.presence-icon {
+  display: grid;
+  width: 44px;
+  height: 44px;
+  place-items: center;
+  color: #e2e8f0;
+  background: #1e293b;
+  border: 1px solid #64748b;
+  border-radius: 50%;
+  font-size: 1.45rem;
+  font-weight: 900;
+}
+
+.presence-card[data-state="valid"] {
+  background: rgba(6, 78, 59, 0.28);
+  border-color: #34d399;
+}
+
+.presence-card[data-state="valid"] .presence-icon {
+  color: #052e16;
+  background: #6ee7b7;
+  border-color: #a7f3d0;
+}
+
+.presence-card[data-state="expired"],
+.presence-card[data-state="invalid"] {
+  background: rgba(127, 29, 29, 0.2);
+  border-color: #f87171;
+}
+
+.presence-card[data-state="expired"] .presence-icon,
+.presence-card[data-state="invalid"] .presence-icon {
+  color: #450a0a;
+  background: #fca5a5;
+  border-color: #fecaca;
+}
+
+.presence-card[data-state="checking"] {
+  border-color: #38bdf8;
+}
+
+.presence-card[data-state="checkout"] {
+  background: rgba(30, 64, 175, 0.16);
+  border-color: #60a5fa;
+}
+
 @media (max-width: 620px) {
   body {
     padding: 80px 10px 24px;

@@ -18,6 +18,18 @@
 
     <div id="message" class="message">正在初始化……</div>
 
+    <section id="presence-card" class="card presence-card" data-state="missing">
+      <div class="presence-card-heading">
+        <span class="presence-icon" aria-hidden="true">⌁</span>
+        <div>
+          <h2 id="presence-status">尚未取得現場認證</h2>
+          <p id="presence-detail" aria-live="polite">
+            簽到前請在現場感應裝置並掃描 QR Code。
+          </p>
+        </div>
+      </div>
+    </section>
+
     <section id="signed-out-card" class="card hidden">
       <h2>Google 帳號登入</h2>
       <p class="hint">
@@ -62,7 +74,9 @@
               主要借用者
             </label>
           </div>
-          <button id="check-in-button" class="primary-button" type="button">簽到</button>
+          <button id="check-in-button" class="primary-button" type="button" disabled>
+            驗證並簽到
+          </button>
         </div>
 
         <div id="check-out-controls" class="hidden">

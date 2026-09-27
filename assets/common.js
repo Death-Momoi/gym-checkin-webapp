@@ -116,7 +116,7 @@
         <div class="drawer-header">
           <div class="drawer-brand">
             <strong>功能選單</strong>
-            <span>v1.4 首次登入姓名綁定</span>
+            <span>v1.5 現場 QR 簽到認證</span>
           </div>
           <button id="drawer-close-button" class="drawer-close-button"
             type="button" aria-label="關閉功能選單">×</button>

@@ -5,3 +5,6 @@ verify_jwt = true
 
 [functions.get-calendar-events]
 verify_jwt = true
+
+[functions.issue-presence-token]
+verify_jwt = false
