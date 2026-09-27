@@ -1445,8 +1445,9 @@ span.flatpickr-weekday {
 
 .overview-date-controls {
   display: grid;
-  grid-template-columns: auto minmax(155px, 1fr) auto minmax(135px, 0.65fr);
+  grid-template-columns: 46px minmax(155px, 230px) 46px;
   gap: 9px;
+  width: min(100%, 349px);
   margin-top: 8px;
 }
 
@@ -1454,6 +1455,13 @@ span.flatpickr-weekday {
 .overview-date-controls button {
   width: 100%;
   margin: 0;
+}
+
+.overview-date-controls button {
+  min-height: 46px;
+  padding: 0;
+  font-size: 1.25rem;
+  line-height: 1;
 }
 
 .overview-chart-card {
@@ -1597,8 +1605,10 @@ span.flatpickr-weekday {
   position: absolute;
   top: 10px;
   color: #94a3b8;
-  font-size: 0.7rem;
+  font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
+  font-size: 0.66rem;
   font-weight: 700;
+  line-height: 1;
   transform: translateX(-50%);
 }
 
@@ -2005,7 +2015,8 @@ span.flatpickr-weekday {
   }
 
   .overview-date-controls {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: 44px minmax(0, 1fr) 44px;
+    width: 100%;
   }
 
   .overview-chart-card {
@@ -2027,12 +2038,17 @@ span.flatpickr-weekday {
     font-size: 0.76rem;
   }
 
-  .timeline-axis-track > .timeline-axis-tick:not(.timeline-axis-major) {
-    display: none;
+  .timeline-axis-track {
+    height: 46px;
   }
 
   .timeline-axis-track > span:not(.timeline-now-marker) {
-    font-size: 0.64rem;
+    top: 8px;
+    font-size: 0.58rem;
+  }
+
+  .timeline-axis-track > .timeline-axis-odd {
+    top: 25px;
   }
 
   .timeline-bar {

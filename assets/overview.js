@@ -8,7 +8,6 @@
   const dateInput = document.getElementById('overview-date');
   const previousButton = document.getElementById('overview-previous-button');
   const nextButton = document.getElementById('overview-next-button');
-  const refreshButton = document.getElementById('overview-refresh-button');
   const status = document.getElementById('overview-status');
   const emptyState = document.getElementById('overview-empty');
   const timeAxis = document.getElementById('overview-time-axis');
@@ -40,8 +39,6 @@
     dateInput.disabled = isBusy;
     previousButton.disabled = isBusy;
     nextButton.disabled = isBusy;
-    refreshButton.disabled = isBusy;
-    refreshButton.textContent = isBusy ? '讀取中……' : '重新讀取';
   }
 
   function clamp(value, minimum, maximum) {
@@ -308,12 +305,13 @@
 
   function renderAxis(selectedDate) {
     timeAxis.replaceChildren();
-    for (let minute = 0; minute <= 1440; minute += 120) {
+    for (let minute = 0; minute <= 1440; minute += 60) {
       const label = document.createElement('span');
-      label.textContent = minutesToLabel(minute);
+      const hour = minute / 60;
+      label.textContent = String(hour).padStart(2, '0');
       label.style.left = `${(minute / 1440) * 100}%`;
       label.className = 'timeline-axis-tick';
-      if (minute % 360 === 0) label.classList.add('timeline-axis-major');
+      if (hour % 2 === 1) label.classList.add('timeline-axis-odd');
       if (minute === 0) label.classList.add('first');
       if (minute === 1440) label.classList.add('last');
       timeAxis.appendChild(label);
@@ -487,7 +485,6 @@
 
   previousButton.addEventListener('click', () => changeDate(-1));
   nextButton.addEventListener('click', () => changeDate(1));
-  refreshButton.addEventListener('click', loadOverview);
   dialogCloseIcon.addEventListener('click', closeDetails);
   dialogCloseButton.addEventListener('click', closeDetails);
   dialog.addEventListener('click', event => {
