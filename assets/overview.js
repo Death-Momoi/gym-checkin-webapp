@@ -8,7 +8,6 @@
   const dateInput = document.getElementById('overview-date');
   const previousButton = document.getElementById('overview-previous-button');
   const nextButton = document.getElementById('overview-next-button');
-  const status = document.getElementById('overview-status');
   const emptyState = document.getElementById('overview-empty');
   const timeAxis = document.getElementById('overview-time-axis');
   const usageRows = document.getElementById('overview-usage-rows');
@@ -29,11 +28,6 @@
     forgotten: { label: '忘記簽退／跨日強制結算', className: 'status-forgotten' },
     reservation: { label: 'Google Calendar 預約', className: 'status-reservation' }
   });
-
-  function setStatus(text, type = '') {
-    status.textContent = text;
-    status.className = `section-status${type ? ` ${type}` : ''}`;
-  }
 
   function setBusy(isBusy) {
     dateInput.disabled = isBusy;
@@ -373,14 +367,13 @@
     const selectedDate = dateInput.value;
     const bounds = dateBounds(selectedDate);
     if (!bounds) {
-      setStatus('請先選擇有效日期。', 'error');
+      GymApp.setMessage('請選擇有效日期。', 'error');
       return;
     }
 
     const currentRequest = ++requestSequence;
     setBusy(true);
-    GymApp.setMessage('正在同步簽到紀錄與 Google Calendar……');
-    setStatus('讀取中……');
+    GymApp.setMessage('正在更新……');
 
     try {
       const attendanceRequest = app.client
@@ -445,16 +438,13 @@
       }
 
       renderTimeline(usageRecords, reservations, selectedDate);
-      const summary = `簽到紀錄 ${usageRecords.length} 筆｜預約 ${reservations.length} 筆`;
       if (calendarWarning) {
         GymApp.setMessage(
           `已讀取簽到紀錄，但預約讀取失敗：${calendarWarning}`,
           'error'
         );
-        setStatus(`${summary}｜預約資料暫時無法取得`, 'error');
       } else {
-        GymApp.setMessage('借用狀態總覽已更新。', 'success');
-        setStatus(summary, 'success');
+        GymApp.setMessage('資料已更新。', 'success');
       }
     } catch (error) {
       if (currentRequest !== requestSequence) return;
@@ -463,7 +453,6 @@
       emptyState.classList.add('hidden');
       console.error('Overview loading failed', error);
       GymApp.setMessage(`圖表讀取失敗：${error.message}`, 'error');
-      setStatus('讀取失敗，請稍後重試。', 'error');
     } finally {
       if (currentRequest === requestSequence) setBusy(false);
     }

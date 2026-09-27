@@ -1438,30 +1438,84 @@ span.flatpickr-weekday {
   width: min(100%, 1100px);
 }
 
-.overview-controls-card > label {
-  color: #e2e8f0;
-  font-weight: 750;
+.overview-controls-card {
+  display: grid;
+  padding: 16px;
+  place-items: center;
 }
 
 .overview-date-controls {
   display: grid;
   grid-template-columns: 46px minmax(155px, 230px) 46px;
-  gap: 9px;
-  width: min(100%, 349px);
-  margin-top: 8px;
+  gap: 0;
+  width: min(100%, 330px);
+  padding: 4px;
+  background: #030712;
+  border: 1px solid #334155;
+  border-radius: 14px;
+  box-shadow: inset 0 1px 8px rgba(0, 0, 0, 0.32);
 }
 
-.overview-date-controls input,
+.overview-date-controls #overview-date,
 .overview-date-controls button {
   width: 100%;
   margin: 0;
 }
 
 .overview-date-controls button {
-  min-height: 46px;
+  min-height: 42px;
   padding: 0;
+  color: #94a3b8;
+  background: transparent;
+  border-radius: 10px;
   font-size: 1.25rem;
   line-height: 1;
+}
+
+.overview-date-controls button:hover:not(:disabled) {
+  color: #67e8f9;
+  background: #172033;
+  transform: none;
+}
+
+.overview-date-controls #overview-date {
+  padding: 8px 4px;
+  color: #e5e7eb;
+  text-align: center;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+}
+
+.overview-date-controls #overview-date:focus {
+  outline: 0;
+}
+
+.overview-controls-card > .message {
+  min-height: 1.25em;
+  margin: 9px 0 0;
+  padding: 0;
+  color: #94a3b8;
+  text-align: center;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  font-size: 0.78rem;
+  line-height: 1.4;
+}
+
+.overview-controls-card > .message.success {
+  color: #34d399;
+  background: transparent;
+  border: 0;
+}
+
+.overview-controls-card > .message.error {
+  color: #fca5a5;
+  background: transparent;
+  border: 0;
 }
 
 .overview-chart-card {
@@ -2016,7 +2070,7 @@ span.flatpickr-weekday {
 
   .overview-date-controls {
     grid-template-columns: 44px minmax(0, 1fr) 44px;
-    width: 100%;
+    width: min(100%, 330px);
   }
 
   .overview-chart-card {

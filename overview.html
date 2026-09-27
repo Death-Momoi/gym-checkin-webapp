@@ -19,23 +19,16 @@
       <p>以同一時間軸對照實際簽到／簽退時間與 Google Calendar 預約時段。</p>
     </div>
 
-    <div id="message" class="message">正在讀取圖表……</div>
-
     <section class="card overview-controls-card">
-      <label for="overview-date">查詢日期</label>
-      <div class="overview-date-controls">
+      <div class="overview-date-controls" aria-label="查詢日期切換">
         <button id="overview-previous-button" class="secondary-button" type="button"
           aria-label="前一天">&lt;</button>
         <input id="overview-date" type="text" placeholder="YYYY-MM-DD"
-          autocomplete="off" inputmode="none">
+          autocomplete="off" inputmode="none" aria-label="查詢日期">
         <button id="overview-next-button" class="secondary-button" type="button"
           aria-label="後一天">&gt;</button>
       </div>
-      <p class="date-marker-hint">
-        <span class="date-marker-dot" aria-hidden="true"></span>
-        日曆上的藍點代表當天有人實際簽到。
-      </p>
-      <p id="overview-status" class="section-status" aria-live="polite"></p>
+      <div id="message" class="message" aria-live="polite">正在更新……</div>
     </section>
 
     <section class="card overview-chart-card">
