@@ -8,6 +8,7 @@
   const dateInput = document.getElementById('overview-date');
   const previousButton = document.getElementById('overview-previous-button');
   const nextButton = document.getElementById('overview-next-button');
+  const calendarButton = document.getElementById('overview-calendar-button');
   const emptyState = document.getElementById('overview-empty');
   const timeAxis = document.getElementById('overview-time-axis');
   const usageRows = document.getElementById('overview-usage-rows');
@@ -33,6 +34,7 @@
     dateInput.disabled = isBusy;
     previousButton.disabled = isBusy;
     nextButton.disabled = isBusy;
+    calendarButton.disabled = isBusy;
   }
 
   function clamp(value, minimum, maximum) {
@@ -472,8 +474,26 @@
     loadOverview();
   }
 
+  function openDatePicker() {
+    if (datePicker && typeof datePicker.open === 'function') {
+      datePicker.open();
+      return;
+    }
+
+    if (typeof dateInput.showPicker === 'function') {
+      try {
+        dateInput.showPicker();
+        return;
+      } catch {
+        // 較舊的瀏覽器改用原生 click 嘗試開啟日期選擇器。
+      }
+    }
+    dateInput.click();
+  }
+
   previousButton.addEventListener('click', () => changeDate(-1));
   nextButton.addEventListener('click', () => changeDate(1));
+  calendarButton.addEventListener('click', openDatePicker);
   dialogCloseIcon.addEventListener('click', closeDetails);
   dialogCloseButton.addEventListener('click', closeDetails);
   dialog.addEventListener('click', event => {
@@ -485,7 +505,8 @@
     input: dateInput,
     initialDate,
     loadActiveDates: loadOverviewActiveDates,
-    onChange: loadOverview
+    onChange: loadOverview,
+    clickOpens: false
   });
   if (!datePicker) {
     dateInput.value = initialDate;

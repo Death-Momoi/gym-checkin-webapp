@@ -608,7 +608,8 @@
     input,
     initialDate,
     loadActiveDates,
-    onChange
+    onChange,
+    clickOpens = true
   }) {
     if (!input) return null;
 
@@ -685,6 +686,7 @@
 
     const options = {
       allowInput: false,
+      clickOpens,
       dateFormat: 'Y-m-d',
       disableMobile: true,
       locale,

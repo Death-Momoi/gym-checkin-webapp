@@ -19,24 +19,31 @@
       <p>以同一時間軸對照實際簽到／簽退時間與 Google Calendar 預約時段。</p>
     </div>
 
-    <section class="card overview-controls-card">
-      <div class="overview-date-controls" aria-label="查詢日期切換">
-        <button id="overview-previous-button" class="secondary-button" type="button"
-          aria-label="前一天">&lt;</button>
-        <input id="overview-date" type="text" placeholder="YYYY-MM-DD"
-          autocomplete="off" inputmode="none" aria-label="查詢日期">
-        <button id="overview-next-button" class="secondary-button" type="button"
-          aria-label="後一天">&gt;</button>
-      </div>
-      <div id="message" class="message" aria-live="polite">正在更新……</div>
-    </section>
-
     <section class="card overview-chart-card">
       <div class="overview-chart-heading">
         <div>
           <h2>當日借用狀態</h2>
           <p class="hint">姓名右側色塊的位置與長度代表使用時段；點選色塊可查看詳細資訊。</p>
         </div>
+      </div>
+
+      <div class="overview-chart-date-panel">
+        <div class="overview-date-controls" aria-label="查詢日期切換">
+          <button id="overview-previous-button" class="secondary-button" type="button"
+            aria-label="前一天">&lt;</button>
+          <input id="overview-date" type="text" placeholder="YYYY-MM-DD"
+            autocomplete="off" inputmode="none" tabindex="-1"
+            aria-label="目前查詢日期">
+          <button id="overview-calendar-button" class="overview-calendar-button"
+            type="button" aria-label="開啟日曆選擇日期">
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path d="M7 3v3M17 3v3M4 9h16M5 5h14a1 1 0 0 1 1 1v14H4V6a1 1 0 0 1 1-1Z" />
+            </svg>
+          </button>
+          <button id="overview-next-button" class="secondary-button" type="button"
+            aria-label="後一天">&gt;</button>
+        </div>
+        <div id="message" class="message" aria-live="polite">正在更新……</div>
       </div>
 
       <div class="timeline-legend" aria-label="借用狀態圖例">
