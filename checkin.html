@@ -5,15 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>前往簽到／簽退｜運動科學實驗室簽到系統</title>
   <link rel="stylesheet" href="./assets/styles.css">
-  <script>
-    (function () {
-      const target = new URL('./index.html', window.location.href);
-      const current = new URL(window.location.href);
-      target.search = current.search;
-      target.hash = current.hash;
-      window.location.replace(target.toString());
-    })();
-  </script>
+  <script type="module" src="./assets/pages/checkin.js"></script>
 </head>
 <body>
   <main class="page-container">
