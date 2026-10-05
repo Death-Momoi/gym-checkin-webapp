@@ -366,6 +366,7 @@
   async function showDailyStamp(kind, data) {
     try {
       await window.FootprintsUI.present(kind, app, data);
+      if (kind === 'in') await window.MonthlyCards.afterCheckIn(app, data);
     } catch (error) {
       // A local add-on must never turn a successful attendance operation into failure.
       console.warn('Local stamp view unavailable', error);

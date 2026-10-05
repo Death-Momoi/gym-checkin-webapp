@@ -1,3 +1,5 @@
+> 2026-10-05 v19（以 v17 為基礎）：新增本機訓練進步圖表、每日體重紀錄及月度成果集卡。保留 v17 本機集章，沒有採用 v18 雲端足跡。請參閱 [UPDATE_LOCAL_FITNESS_V19.md](./UPDATE_LOCAL_FITNESS_V19.md)。
+
 > 2026-10-05 v17：新增每日到訪集章與簽退成果小卡，回顧整合於「我的健身足跡」。更新步驟與計次規則見 [UPDATE_FOOTPRINTS.md](./UPDATE_FOOTPRINTS.md)。
 
 > 2026-10-05 更新：新增只存手機瀏覽器的「訓練助手」。部署方式與本機備份說明見 [UPDATE_LOCAL_TRAINING.md](./UPDATE_LOCAL_TRAINING.md)。
@@ -19,6 +21,11 @@ Supabase 作為驗證、PostgreSQL 資料庫與 Edge Functions 後端。
 - `present.html`：目前在場人員
 - `assist.html`：協助共同使用者簽退
 - `calendar.html`：Google Calendar 預約查詢
+- `training.html`：本機訓練紀錄與組間計時器
+- `progress.html`：每個動作最近 10 個訓練日的最大重量及總訓練量折線圖
+- `bodyweight.html`：本機每日體重、日期範圍圖表與紀錄列表
+- `monthly.html`：每月首次簽到領取的上月成果卡、PNG 下載及本機備份
+- `footprints.html`：v17 個人集章與簽退成果回顧
 - `foodwheel.html`：預設分類與自訂店家的美食轉盤
 - `history.html`：依日期查詢簽到紀錄
 - `report.html`：問題回報與 Gmail 通知

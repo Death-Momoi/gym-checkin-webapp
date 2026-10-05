@@ -2272,3 +2272,29 @@ body.stamp-page-open { overflow: hidden; }
   .stamp-stats dt { font-size: .72rem; }
 }
 @media (prefers-reduced-motion: reduce) { .stamp-land { animation: none; } }
+
+/* v19 local progress, weight journal and monthly collection */
+.fitness-page { max-width: 820px; }
+.fitness-page .card { margin-bottom: 20px; }
+.fitness-page label { display: block; flex: 1; min-width: 0; font-size: .9rem; }
+.fitness-page input, .fitness-page select { width: 100%; min-width: 0; margin-top: 8px; font-size: 16px; }
+.fitness-page fieldset { margin: 0; padding: 0; border: 0; min-width: 0; }
+.fitness-controls { display: flex; flex-wrap: wrap; align-items: end; gap: 14px; margin: 16px 0; }
+.fitness-controls label { min-width: 120px; }
+.fitness-page .hint { line-height: 1.7; }
+.chart-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 0 -8px; }
+.fitness-chart { display: block; width: 100%; }
+.fitness-chart g:focus circle { stroke: #fff; stroke-width: 4; }
+.chart-empty { padding: 48px 12px; text-align: center; color: #94a3b8; line-height: 1.8; }
+.fitness-table { width: 100%; border-collapse: collapse; margin-top: 16px; }
+.fitness-table th, .fitness-table td { padding: 10px; border-bottom: 1px solid #334155; text-align: left; }
+.weight-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 18px 0; border-bottom: 1px solid #334155; }
+.weight-row p { margin: 6px 0 0; color: #c4b5fd; font-size: 1.3rem; font-weight: 700; }
+.weight-row .training-actions { margin: 0; gap: 8px; }
+.monthly-grid { display: grid; gap: 28px; }
+.monthly-art { display: block; width: 100%; height: auto; border-radius: 24px; border: 1px solid #45605f; }
+.monthly-entry { padding: 0; }
+.monthly-notice { margin: 20px auto; padding: 20px; max-width: 600px; border: 1px solid #d4b66b; border-radius: 16px; background: #24322c; color: #f3e5bd; }
+.monthly-notice p { line-height: 1.6; }
+.monthly-description { line-height: 1.8; color: #cbd5e1; }
+@media (max-width: 420px) { .weight-row { align-items: flex-start; flex-direction: column; } .fitness-controls { gap: 10px; } }

@@ -36,6 +36,9 @@
       ]
     },
     { key: 'training', href: 'training.html', icon: '◷', label: '訓練助手' },
+    { key: 'progress', href: 'progress.html', icon: '↗', label: '訓練進步圖表' },
+    { key: 'bodyweight', href: 'bodyweight.html', icon: '◇', label: '體重紀錄' },
+    { key: 'monthly', href: 'monthly.html', icon: '▣', label: '月度成果集卡' },
     { key: 'foodwheel', href: 'foodwheel.html', icon: '◉', label: '美食轉盤' },
     { key: 'report', href: 'report.html', icon: '!', label: '問題回報' },
     { key: 'guide', href: 'guide.html', icon: '?', label: '系統使用說明' },
