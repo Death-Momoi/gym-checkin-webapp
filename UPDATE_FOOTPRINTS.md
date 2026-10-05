@@ -1,3 +1,5 @@
+> 本文件為 v17 歷史說明。v18 已改用雲端出入紀錄，取消本機集章儲存與匯入匯出；部署請參閱 [UPDATE_CLOUD_FOOTPRINTS.md](./UPDATE_CLOUD_FOOTPRINTS.md)。
+
 # v17：個人健身集章卡與簽退成果小卡
 
 本版以已交付的 `gym-checkin-webapp-v16-local-training.zip` 為基礎，保留訓練助手、美食轉盤、QR 認證、借用圖表及原有管理功能。這是完整程式包，尚未推送或部署正式網站。

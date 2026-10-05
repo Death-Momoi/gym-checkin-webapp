@@ -4,8 +4,17 @@
   const params=new URLSearchParams(location.search), kind=params.get('view')==='out'?'out':'in';
   document.body.dataset.page=kind==='in'?'stampbook':'checkoutcards';
   const app=await GymApp.init(); if(!app)return;
+  store.configure(app);
   const userId=app.session.user.id, name=GymApp.profileName(app.profile,app.session);
-  let rows=[],limit=12,busy=false;
+  let rows=[],limit=12,busy=false,accountChanged=false;
+  // Register before the initial request so an account change cannot reveal stale results.
+  app.client.auth.onAuthStateChange((_event,session)=>{
+    if(session?.user?.id!==userId){
+      accountChanged=true;store.invalidate();rows=[];
+      $('footprints-content').classList.add('hidden');document.getElementById('stamp-dialog')?.close();
+      if(session)window.location.replace('./index.html');
+    }
+  });
   $('footprints-owner').textContent=`${name} · 每天一個到訪章，一張簽退成果卡。`;
   $('tab-'+kind).setAttribute('aria-current','page');
   $('footprints-month').value=/^\d{4}-(0[1-9]|1[0-2])$/.test(params.get('month')||'')&&Number(params.get('month').slice(0,4))>=1970&&Number(params.get('month').slice(0,4))<=9998?params.get('month'):GymApp.taipeiDateString().slice(0,7);
@@ -16,7 +25,7 @@
     $('month-count').textContent=selected.length;
     $('total-count').textContent=rows.filter(r=>r.kind===kind).length;
     $('month-count-label').textContent=kind==='in'?'本月到訪天數':'本月完成簽退天數';$('total-count-label').textContent=kind==='in'?'累積到訪天數':'累積完成簽退天數';
-    $('footprints-rule').textContent=kind==='in'?'每天只蓋一次，點選有印章的日期即可回顧。':'每天最多一張成果卡，保留當天第一次本人簽退的內容。';
+    $('footprints-rule').textContent=kind==='in'?'每天只蓋一次，點選有印章的日期即可回顧。':'每天最多一張成果卡，顯示雲端當天第一次完成簽退的內容。';
     for(const k of ['in','out'])$('tab-'+k).href=`./footprints.html?view=${k}&month=${month}`;
     if(kind==='in') {
       const calendar=$('stamp-calendar');calendar.replaceChildren();
@@ -34,12 +43,13 @@
       $('stamp-empty').classList.toggle('hidden',selected.length>0);
     }else {
       const list=$('checkout-cards');list.replaceChildren();
-      if(!selected.length)list.append(el('p','本月還沒有成果卡。下次本人簽退成功，就會在這裡留下紀錄。','card training-empty'));
+      if(!selected.length)list.append(el('p','本月還沒有成果卡。雲端尚未有此月份已完成簽退的紀錄。','card training-empty'));
       selected.slice(0,limit).forEach(entry=>{
         const item=el('article',undefined,'card checkout-mini-card');
         const top=el('div',undefined,'training-heading');top.append(el('h3',entry.date),el('span','✓ 已完成','checkout-label'));item.append(top);
         const stats=store.stats(rows,'out',entry.date);
         item.append(el('p',`截至這天，本月已完成 ${stats.month} 天`,'checkout-mini-title'),el('p',`首次簽退 ${GymApp.formatTime(entry.at)} · 停留 ${FootprintsUI.duration(entry)}`,'hint'));
+        if(entry.checkoutMethod==='assisted')item.append(el('p','由他人協助簽退','hint'));
         const button=el('button','查看這天的成果','secondary-button');button.type='button';button.onclick=()=>FootprintsUI.review(entry,rows,name);item.append(button);list.append(item);
       });
       $('checkout-more').classList.toggle('hidden',limit>=selected.length);
@@ -60,33 +70,17 @@
     $('footprints-month').value=`${year}-${String(date.getUTCMonth()+1).padStart(2,'0')}`;selectMonth($('footprints-month').value);
   };
   $('checkout-more').onclick=()=>{limit+=12;render();};
-  $('footprints-export').onclick=async()=>{
-    if(busy)return;
-    try {
-      const stamps=await store.all(userId), data={format:'gym-footprints-backup',version:1,userId,exportedAt:new Date().toISOString(),stamps};
-      const url=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}));
-      const a=el('a');a.href=url;a.download=`健身足跡_${GymApp.taipeiDateString()}_${Date.now()}.json`;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),60000);
-      GymApp.setMessage(`已產生 ${stamps.length} 個印章的備份，請確認手機下載完成。`,'success');
-    }catch(error){GymApp.setMessage(`無法備份：${error.message}`,'error');}
-  };
-  $('footprints-import').onclick=()=>$('footprints-file').click();
-  $('footprints-file').onchange=async event=>{
-    const file=event.target.files[0];event.target.value='';if(!file||busy)return;
-    busy=true;$('footprints-import').disabled=true;$('footprints-export').disabled=true;
-    try{
-      if(file.size>20*1024*1024)throw new Error('檔案超過 20 MB。');
-      const parsed=store.parseBackup(JSON.parse(await file.text()),userId);
-      if(!confirm(`合併 ${parsed.length} 個本帳號印章？相同日期及類型會保留手機原有紀錄。`))return;
-      const result=await store.merge(userId,parsed);await refresh();
-      GymApp.setMessage(`已新增 ${result.added} 個印章，保留 ${result.skipped} 個現有印章。`,'success');
-    }catch(error){GymApp.setMessage(`匯入未完成：${error.message}`,'error');}
-    finally{busy=false;$('footprints-import').disabled=false;$('footprints-export').disabled=false;}
-  };
-  try {await refresh();$('footprints-content').classList.remove('hidden');GymApp.hideMessage();}
-  catch(error){GymApp.setMessage(`讀取本機足跡失敗：${error.message}。請確認瀏覽器允許儲存資料後重新整理。`,'error');}
-  // Do not keep a previous user's cards visible after an account change in another tab.
-  app.client.auth.onAuthStateChange((_event,session)=>{
-    if(session?.user?.id!==userId){$('footprints-content').classList.add('hidden');document.getElementById('stamp-dialog')?.close();if(session)window.location.replace('./index.html');}
-  });
-  document.addEventListener('visibilitychange',()=>{if(!document.hidden&&!busy)refresh().catch(()=>GymApp.setMessage('無法更新本機足跡，請重新整理。','error'));});
+  async function loadCloud() {
+    if(busy||accountChanged)return;
+    busy=true;$('footprints-refresh').disabled=true;
+    $('footprints-content').classList.add('hidden');
+    document.getElementById('stamp-dialog')?.close();
+    GymApp.setMessage('正在讀取此帳號的雲端簽到紀錄……');
+    try {await refresh();if(!accountChanged){$('footprints-content').classList.remove('hidden');GymApp.hideMessage();}}
+    catch(error){if(!accountChanged)GymApp.setMessage(error.message||'讀取失敗，請確認網路後重新讀取。','error');}
+    finally{busy=false;$('footprints-refresh').disabled=false;}
+  }
+  $('footprints-refresh').onclick=loadCloud;
+  await loadCloud();
+
 })();

@@ -14,7 +14,8 @@
 <body data-page="stampbook" data-title="我的健身足跡">
   <main class="page-container footprints-page">
     <div class="page-heading"><span class="training-eyebrow">MY FITNESS JOURNAL</span><h1>我的健身足跡</h1><p id="footprints-owner">每一次到場，都值得留下紀錄。</p></div>
-    <div id="message" class="message" role="status">正在讀取本機足跡……</div>
+    <div id="message" class="message" role="status">正在讀取雲端足跡……</div>
+    <button id="footprints-refresh" type="button" class="secondary-button footprints-refresh">重新讀取雲端紀錄</button>
     <div id="footprints-content" class="hidden">
       <nav class="footprints-tabs" aria-label="健身足跡分類"><a href="./footprints.html?view=in" id="tab-in">個人健身集章卡</a><a href="./footprints.html?view=out" id="tab-out">簽退成果小卡</a></nav>
       <section class="card footprints-month-card">
@@ -24,7 +25,7 @@
       </section>
       <section id="stamp-calendar-section" class="card"><h2>本月集章卡</h2><div class="stamp-weekdays" aria-hidden="true"><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span><span>日</span></div><div id="stamp-calendar" class="stamp-calendar" aria-label="到訪集章月曆"></div><p id="stamp-empty" class="hint hidden">本月還沒有到訪章。下次簽到成功，就會自動蓋上第一章。</p></section>
       <section id="checkout-cards-section" class="hidden"><h2>每天一張，留下完成的足跡</h2><div id="checkout-cards" class="checkout-cards"></div><button id="checkout-more" type="button" class="secondary-button hidden">顯示更多成果卡</button></section>
-      <details class="card footprints-backup"><summary>本機紀錄與備份</summary><p>只保存在這個瀏覽器，依 Google 帳號分開。從本版啟用後，在此瀏覽器成功操作的簽到／本人簽退開始累積，不會自動載入舊紀錄或其他手機的紀錄。</p><p>每天依台灣日期分別計一個到訪章、一張簽退成果卡；重複操作保留當天首次紀錄。此處供個人回顧，正式出入紀錄請查看「借用狀態 → 簽到紀錄」。</p><p>清除網站資料或換手機可能失去紀錄。健身足跡與訓練助手分開備份；匯入足跡時需登入原本的 Google 帳號，相同日期與類型會保留手機現有紀錄。</p><div class="training-actions"><button id="footprints-export" type="button" class="primary-button">下載足跡備份</button><button id="footprints-import" type="button" class="secondary-button">匯入足跡備份</button></div><input id="footprints-file" type="file" accept=".json,application/json" hidden><p class="hint">最多 20 MB、20,000 個印章。備份只包含本帳號的足跡，不含登入憑證。</p></details>
+      <details class="card footprints-backup"><summary>紀錄來源與計次方式</summary><p>依目前登入 Google 帳號對應的使用者 ID，讀取系統已有的雲端簽到紀錄。過去紀錄會一併顯示；換手機登入同一帳號，也能看到相同足跡。</p><p>每天依台灣日期分別計一個到訪章、一張簽退成果卡。多次出入只計一天，顯示該日最早的簽到／已完成簽退紀錄；協助簽退也會納入本人已完成的簽退紀錄，並標明來源。</p><p>足跡不另存手機，也不需要匯入備份。資料庫紀錄若被更正，重新讀取後會同步更新。重量、次數、組數等「訓練助手」資料仍只存本機，請另外備份。</p></details>
     </div>
   </main>
 </body>

@@ -2272,3 +2272,4 @@ body.stamp-page-open { overflow: hidden; }
   .stamp-stats dt { font-size: .72rem; }
 }
 @media (prefers-reduced-motion: reduce) { .stamp-land { animation: none; } }
+.footprints-refresh { margin-bottom: 16px; }
