@@ -24,7 +24,7 @@
       const detail=el('div',undefined,'stamp-session-detail');
       detail.append(el('strong',`本日首次簽退 · 停留 ${duration(entry)}`));
       detail.append(el('p',`${GymApp.formatDateTime(entry.checkedInAt)} → ${GymApp.formatDateTime(entry.checkedOutAt)}`));
-      detail.append(el('p',(entry.checkoutMethod==='assisted'?'此筆由他人協助簽退。':'')+'停留時間不代表實際運動時間。'));
+      detail.append(el('p','停留時間不代表實際運動時間。'));
       section.append(detail);
     } else section.append(el('p',`本日首次簽到 ${GymApp.formatTime(entry.at)}，已留下今天的到訪章。`,'stamp-caption'));
     section.append(el('p',duplicate?'這次簽到／簽退仍已成功；今日印章與天數不重複增加，保留首次紀錄。':review?'本週、本月與累積天數計算至卡片日期。':'同一台灣日期只計一次。休息與恢復，也是一部分。','stamp-caption'));
@@ -48,17 +48,19 @@
   }
   async function present(kind,app,payload) {
     const dlg=dialog(kind);
-    const render=async()=>{
-      dlg.replaceChildren(el('h1',`${kind==='in'?'簽到':'簽退'}已成功`),el('p','正在讀取你的雲端紀錄，整理今日印章……','stamp-caption'));
+    const render = async () => {
+      dlg.replaceChildren(el('p','正在把今日印章存入手機……','stamp-caption'));
       try {
-        const result=await store.afterSuccess(app,kind,payload);
-        if(!dlg.isConnected)return;
-        dlg.replaceChildren(card(result.entry,result.rows,{name:GymApp.profileName(app.profile,app.session),duplicate:result.duplicate}));
+        const result=await store.record(app.session.user.id,kind,payload);
+        let rows, reviewError='';
+        try {rows=await store.all(app.session.user.id);} catch {rows=null;reviewError='印章已存入手機，目前無法讀取累積統計，稍後可至「我的健身足跡」查看。';}
+        dlg.replaceChildren();
+        if(rows) dlg.append(card(result.entry,rows,{name:GymApp.profileName(app.profile,app.session),duplicate:result.duplicate}));
+        else {dlg.append(el('h1',kind==='in'?'簽到成功，今日已蓋章':'簽退成功，成果卡已儲存'));dlg.append(el('p',reviewError));}
         links(dlg,kind,false,result.entry.date);
-      }catch(error){
-        if(!dlg.isConnected)return;
-        dlg.replaceChildren(el('h1',`${kind==='in'?'簽到':'簽退'}已成功`),el('p','暫時無法讀取累積成果。出入紀錄已儲存在雲端，不必再次簽到／簽退。','stamp-caption'),el('p',error.message||'請確認網路後重試。','message error'));
-        const retry=el('button','重新讀取成果','primary-button');retry.type='button';retry.onclick=render;dlg.append(retry);links(dlg,kind);
+      } catch(error) {
+        dlg.replaceChildren(el('h1',`${kind==='in'?'簽到':'簽退'}已成功`),el('p','但今日印章尚未儲存，請勿為了集章再次簽到／簽退。','stamp-caption'),el('p',error.message||'手機儲存空間無法使用。','message error'));
+        const retry=el('button','重試儲存印章','primary-button');retry.type='button';retry.onclick=render;dlg.append(retry);links(dlg,kind);
       }
     };
     await render();

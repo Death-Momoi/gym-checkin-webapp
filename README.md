@@ -1,5 +1,3 @@
-> 2026-10-05 v18：健身集章與簽退成果改由 Supabase 既有出入紀錄產生，支援歷史紀錄及同帳號跨裝置回顧。請依 [UPDATE_CLOUD_FOOTPRINTS.md](./UPDATE_CLOUD_FOOTPRINTS.md) 更新。
-
 > 2026-10-05 v17：新增每日到訪集章與簽退成果小卡，回顧整合於「我的健身足跡」。更新步驟與計次規則見 [UPDATE_FOOTPRINTS.md](./UPDATE_FOOTPRINTS.md)。
 
 > 2026-10-05 更新：新增只存手機瀏覽器的「訓練助手」。部署方式與本機備份說明見 [UPDATE_LOCAL_TRAINING.md](./UPDATE_LOCAL_TRAINING.md)。
@@ -21,8 +19,6 @@ Supabase 作為驗證、PostgreSQL 資料庫與 Edge Functions 後端。
 - `present.html`：目前在場人員
 - `assist.html`：協助共同使用者簽退
 - `calendar.html`：Google Calendar 預約查詢
-- `training.html`：本機訓練紀錄與組間休息計時器
-- `footprints.html`：依登入帳號雲端紀錄產生個人集章卡及簽退成果卡
 - `foodwheel.html`：預設分類與自訂店家的美食轉盤
 - `history.html`：依日期查詢簽到紀錄
 - `report.html`：問題回報與 Gmail 通知

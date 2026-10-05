@@ -367,9 +367,9 @@
     try {
       await window.FootprintsUI.present(kind, app, data);
     } catch (error) {
-      // A receipt read must never turn a successful attendance operation into failure.
-      console.warn('Stamp view unavailable', error);
-      GymApp.setMessage('簽到／簽退已成功，但集章畫面未能開啟。', 'error');
+      // A local add-on must never turn a successful attendance operation into failure.
+      console.warn('Local stamp view unavailable', error);
+      GymApp.setMessage('簽到／簽退已成功，但本機集章畫面未能開啟。', 'error');
     }
   }
 
@@ -471,7 +471,6 @@
 
   app.client.auth.onAuthStateChange((_event, session) => {
     if (session?.user?.id !== app.session.user.id) {
-      window.FootprintsStore?.invalidate();
       document.getElementById('stamp-dialog')?.close();
       window.location.replace('./index.html');
     }
