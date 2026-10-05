@@ -28,6 +28,13 @@
       ]
     },
     { key: 'assist', href: 'assist.html', icon: '↪', label: '協助簽退' },
+    {
+      key: 'footprints', icon: '✦', label: '我的健身足跡',
+      children: [
+        { key: 'stampbook', href: 'footprints.html?view=in', icon: '✓', label: '個人健身集章卡' },
+        { key: 'checkoutcards', href: 'footprints.html?view=out', icon: '★', label: '簽退成果小卡' }
+      ]
+    },
     { key: 'training', href: 'training.html', icon: '◷', label: '訓練助手' },
     { key: 'foodwheel', href: 'foodwheel.html', icon: '◉', label: '美食轉盤' },
     { key: 'report', href: 'report.html', icon: '!', label: '問題回報' },

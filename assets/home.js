@@ -363,7 +363,18 @@
     }
   }
 
+  async function showDailyStamp(kind, data) {
+    try {
+      await window.FootprintsUI.present(kind, app, data);
+    } catch (error) {
+      // A local add-on must never turn a successful attendance operation into failure.
+      console.warn('Local stamp view unavailable', error);
+      GymApp.setMessage('簽到／簽退已成功，但本機集章畫面未能開啟。', 'error');
+    }
+  }
+
   checkInButton.addEventListener('click', async () => {
+    if (pageBusy) return;
     if (!presenceState.valid || !presenceToken) {
       GymApp.setMessage('請先在現場感應裝置並掃描有效的 QR Code。', 'error');
       return;
@@ -375,7 +386,7 @@
     setBusy(true);
     GymApp.setMessage('正在驗證現場 QR Code 並簽到……');
 
-    const { error } = await app.client.rpc('gym_check_in_with_presence', {
+    const { data, error } = await app.client.rpc('gym_check_in_with_presence', {
       presence_token: presenceToken,
       requested_role: selectedRole
     });
@@ -389,10 +400,13 @@
 
     presenceToken = null;
     clearStoredPresenceToken();
+    // Save from the successful RPC response, never from button clicks or page views.
+    await showDailyStamp('in', data);
     await loadState('現場認證成功，簽到完成。');
   });
 
   checkOutButton.addEventListener('click', async () => {
+    if (pageBusy || !currentAttendance) return;
     const isPrimary = currentAttendance?.gym_role === 'primary';
     const transferTo = isPrimary && transferUser.value
       ? transferUser.value
@@ -416,7 +430,7 @@
     setBusy(true);
     GymApp.setMessage('正在簽退……');
 
-    const { error } = await app.client.rpc('gym_check_out', {
+    const { data, error } = await app.client.rpc('gym_check_out', {
       transfer_to_user_id: transferTo,
       trash_is_checked: trashChecked,
       ac_lights_are_checked: acLightsChecked,
@@ -441,6 +455,7 @@
     document.getElementById('ac-lights-check').checked = false;
     document.getElementById('dehumidifier-check').checked = false;
     transferUser.value = '';
+    await showDailyStamp('out', data);
     await loadState('簽退成功。下次簽到請重新掃描現場 QR Code。');
   });
 
@@ -451,6 +466,13 @@
     } catch (error) {
       GymApp.setMessage(`登出失敗：${error.message}`, 'error');
       logoutButton.disabled = false;
+    }
+  });
+
+  app.client.auth.onAuthStateChange((_event, session) => {
+    if (session?.user?.id !== app.session.user.id) {
+      document.getElementById('stamp-dialog')?.close();
+      window.location.replace('./index.html');
     }
   });
 

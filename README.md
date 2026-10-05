@@ -1,3 +1,5 @@
+> 2026-10-05 v17：新增每日到訪集章與簽退成果小卡，回顧整合於「我的健身足跡」。更新步驟與計次規則見 [UPDATE_FOOTPRINTS.md](./UPDATE_FOOTPRINTS.md)。
+
 > 2026-10-05 更新：新增只存手機瀏覽器的「訓練助手」。部署方式與本機備份說明見 [UPDATE_LOCAL_TRAINING.md](./UPDATE_LOCAL_TRAINING.md)。
 
 # Gym Check-in Web App
