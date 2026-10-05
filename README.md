@@ -1,3 +1,5 @@
+> 2026-10-05 更新：新增只存手機瀏覽器的「訓練助手」。部署方式與本機備份說明見 [UPDATE_LOCAL_TRAINING.md](./UPDATE_LOCAL_TRAINING.md)。
+
 # Gym Check-in Web App
 
 運動科學實驗室簽到系統，以 GitHub Pages 提供多頁式前端，並使用

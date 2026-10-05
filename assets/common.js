@@ -28,6 +28,7 @@
       ]
     },
     { key: 'assist', href: 'assist.html', icon: '↪', label: '協助簽退' },
+    { key: 'training', href: 'training.html', icon: '◷', label: '訓練助手' },
     { key: 'foodwheel', href: 'foodwheel.html', icon: '◉', label: '美食轉盤' },
     { key: 'report', href: 'report.html', icon: '!', label: '問題回報' },
     { key: 'guide', href: 'guide.html', icon: '?', label: '系統使用說明' },
@@ -785,6 +786,7 @@
     functionErrorMessage,
     hideMessage,
     init,
+    mountShell,
     invokeUserFunction,
     loadAttendanceActiveDates,
     loadOpenPeople,
