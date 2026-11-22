@@ -8,3 +8,7 @@ verify_jwt = true
 
 [functions.issue-presence-token]
 verify_jwt = false
+
+# Custom device-secret authentication, like issue-presence-token.
+[functions.ingest-environment]
+verify_jwt = false
