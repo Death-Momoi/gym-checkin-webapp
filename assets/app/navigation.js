@@ -11,6 +11,7 @@ export const NAV_ITEMS = [
         { key: 'history', href: 'history.html', icon: '≡', label: '簽到紀錄' }
       ]
     },
+    { key: 'environment', href: 'environment.html', icon: '☀', label: '環境感測數據' },
     { key: 'assist', href: 'assist.html', icon: '↪', label: '協助簽退' },
     {
       key: 'footprints', icon: '✦', label: '我的健身足跡',
