@@ -1,9 +1,9 @@
 (function () {
   'use strict';
 
-  const SUPABASE_URL = 'https://rihibyswtlqsyljarerr.supabase.co';
+  const SUPABASE_URL = '';
   const SUPABASE_PUBLISHABLE_KEY =
-    'sb_publishable_gS2aS6imvz3_AH9ZgmJXtg_gAXd-wYO';
+    '';
   const REDIRECT_URL = 'https://death-momoi.github.io/gym-checkin-webapp/';
   const RETURN_TO_KEY = 'gym-checkin-return-to';
   const FALLBACK_AVATAR =
@@ -27,6 +27,7 @@
         { key: 'history', href: 'history.html', icon: '≡', label: '簽到紀錄' }
       ]
     },
+    { key: 'environment', href: 'environment.html', icon: '☀', label: '環境感測數據' },
     { key: 'assist', href: 'assist.html', icon: '↪', label: '協助簽退' },
     {
       key: 'footprints', icon: '✦', label: '我的健身足跡',
