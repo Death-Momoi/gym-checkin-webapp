@@ -1,6 +1,6 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
 
-const TOKEN_TTL_SECONDS = 60;
+const TOKEN_TTL_SECONDS = 10 * 60; // 同一組現場 Token 有效 10 分鐘
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
