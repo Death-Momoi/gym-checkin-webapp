@@ -1,6 +1,6 @@
 -- Requires the existing profiles and presence_devices migrations.
 -- Retain only the most recent sample for each device.
-create table public.environment_latest (
+create table if not exists public.environment_latest (
   device_id uuid primary key references public.presence_devices(id) on delete cascade,
   device_code text not null,
   display_name text not null,
@@ -25,6 +25,8 @@ alter table public.environment_latest enable row level security;
 revoke all on table public.environment_latest from anon, authenticated;
 grant select on table public.environment_latest to authenticated;
 grant select, insert, update on table public.environment_latest to service_role;
+drop policy if exists environment_read_active_users
+on public.environment_latest;
 create policy environment_read_active_users on public.environment_latest
 for select to authenticated using (
   exists (select 1 from public.profiles where id=(select auth.uid()) and status='active')
